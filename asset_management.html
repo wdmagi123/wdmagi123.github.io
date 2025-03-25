@@ -1,0 +1,2229 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>空间资产管理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- 添加iOS风格样式 -->
+    <style>
+        .ios-input {
+            @apply bg-gray-100 rounded-lg px-4 py-3 w-full border-0 focus:outline-none focus:ring-2 focus:ring-blue-500;
+        }
+        .ios-button {
+            @apply bg-blue-500 text-white rounded-lg px-4 py-3 w-full font-medium active:bg-blue-600 transition-colors;
+        }
+        .ios-modal {
+            @apply fixed z-50;
+            max-width: 414px;
+            margin: 0 auto;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        .ios-modal-content {
+            @apply bg-white rounded-t-xl w-full p-4 absolute bottom-0 left-0 right-0;
+            transform: translateY(100%);
+            transition: transform 0.3s ease-out;
+        }
+        .ios-modal.active .ios-modal-content {
+            transform: translateY(0);
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f0f0f0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+        .app-container {
+            width: 100%;
+            max-width: 414px; /* iPhone Plus 标准宽度 */
+            height: 100vh;
+            background: #f3f4f6;
+            position: relative;
+            overflow: hidden; /* 防止内容溢出 */
+            margin: 0 auto;
+        }
+        .status-badge {
+            @apply text-xs px-2 py-1 rounded-full;
+        }
+        .status-pending {
+            @apply bg-yellow-100 text-yellow-800;
+        }
+        .status-approved {
+            @apply bg-green-100 text-green-800;
+        }
+        .status-rejected {
+            @apply bg-red-100 text-red-800;
+        }
+        .status-submitted {
+            @apply bg-blue-100 text-blue-800;
+        }
+        .ios-tab {
+            @apply flex-1 text-center py-2;
+        }
+        .ios-tab.active {
+            @apply text-blue-500 border-b-2 border-blue-500;
+        }
+        .ios-header {
+            @apply sticky top-0 bg-white z-10 border-b border-gray-200 px-4 py-3;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+        }
+        /* 添加页面过渡效果 */
+        .page-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #f3f4f6;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            transition: transform 0.3s ease-out;
+            transform: translateX(100%);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 1;
+            padding-bottom: 80px; /* 增加底部内边距，为导航栏留出空间 */
+        }
+
+        .page-container.active {
+            transform: translateX(0);
+            opacity: 1;
+            pointer-events: auto;
+            z-index: 2;
+        }
+        
+        /* 导航栏返回按钮样式 */
+        .nav-back {
+            @apply flex items-center justify-center h-8 w-8 rounded-full;
+        }
+        
+        .nav-back:active {
+            @apply bg-gray-100;
+        }
+
+        /* 修改底部导航栏样式 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            max-width: 414px;
+            margin: 0 auto;
+            background: white;
+            z-index: 100;
+            border-top: 1px solid #e5e7eb;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="app-container">
+        <!-- 所有页面容器 -->
+        <div class="pages-container">
+            <!-- 我的资产页面 -->
+            <div id="my-assets" class="page-container active">
+                <!-- 顶部导航栏 -->
+                <nav class="bg-white shadow-lg fixed w-full bottom-0 left-0 z-40" style="max-width: 414px; margin: 0 auto;">
+                    <div class="flex justify-around items-center h-16">
+                        <a href="#my-assets" class="flex flex-col items-center text-blue-600">
+                            <i class="fas fa-box text-xl"></i>
+                            <span class="text-xs">我的资产</span>
+                        </a>
+                        <a href="#approvals" class="flex flex-col items-center text-gray-600">
+                            <i class="fas fa-clipboard-list text-xl"></i>
+                            <span class="text-xs">审批单据</span>
+                        </a>
+                        <a href="#inventory" class="flex flex-col items-center text-gray-600">
+                            <i class="fas fa-tasks text-xl"></i>
+                            <span class="text-xs">资产盘点</span>
+                        </a>
+                    </div>
+                </nav>
+
+                <div class="ios-header flex flex-col">
+                    <div class="flex justify-between items-center">
+                        <h1 class="text-xl font-bold">我的资产</h1>
+                        <div class="text-sm text-gray-500">共12件</div>
+                    </div>
+                    
+                    <div class="mt-2 flex space-x-2">
+                        <div class="relative flex-1">
+                            <input type="search" placeholder="搜索资产..." class="ios-input py-2 pl-9 pr-3">
+                            <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="px-4 pt-2">
+                    <!-- 资产卡片列表 -->
+                    <div class="space-y-4">
+                        <!-- MacBook Pro -->
+                        <div class="bg-white rounded-xl shadow-sm p-4" onclick="showAssetDetail('asset1')">
+                            <div class="flex items-center">
+                                <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97" 
+                                    class="w-20 h-20 rounded-xl object-cover" alt="电脑设备">
+                                <div class="ml-4 flex-1">
+                                    <h3 class="font-semibold">MacBook Pro</h3>
+                                    <p class="text-gray-600 text-sm">编号：AS-2024-001</p>
+                                    <p class="text-gray-600 text-sm">规格：13寸 M2芯片</p>
+                                    <div class="flex items-center mt-1">
+                                        <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">电子设备</span>
+                                    </div>
+                                </div>
+                                <i class="fas fa-chevron-right text-gray-400"></i>
+                            </div>
+                        </div>
+
+                        <!-- 办公桌 -->
+                        <div class="bg-white rounded-xl shadow-sm p-4" onclick="showAssetDetail('asset2')">
+                            <div class="flex items-center">
+                                <img src="https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd" 
+                                    class="w-20 h-20 rounded-xl object-cover" alt="办公家具">
+                                <div class="ml-4 flex-1">
+                                    <h3 class="font-semibold">人体工学办公桌</h3>
+                                    <p class="text-gray-600 text-sm">编号：AS-2024-002</p>
+                                    <p class="text-gray-600 text-sm">规格：1.8m×0.8m</p>
+                                    <div class="flex items-center mt-1">
+                                        <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">办公家具</span>
+                                    </div>
+                                </div>
+                                <i class="fas fa-chevron-right text-gray-400"></i>
+                            </div>
+                        </div>
+
+                        <!-- 投影仪 -->
+                        <div class="bg-white rounded-xl shadow-sm p-4" onclick="showAssetDetail('asset3')">
+                            <div class="flex items-center">
+                                <img src="https://images.unsplash.com/photo-1517059224940-d4af9eec41b7" 
+                                    class="w-20 h-20 rounded-xl object-cover" alt="投影设备">
+                                <div class="ml-4 flex-1">
+                                    <h3 class="font-semibold">4K激光投影仪</h3>
+                                    <p class="text-gray-600 text-sm">编号：AS-2024-003</p>
+                                    <p class="text-gray-600 text-sm">规格：SONY VPL-4K</p>
+                                    <div class="flex items-center mt-1">
+                                        <span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full">会议设备</span>
+                                    </div>
+                                </div>
+                                <i class="fas fa-chevron-right text-gray-400"></i>
+                            </div>
+                        </div>
+                        
+                        <!-- 显示器 -->
+                        <div class="bg-white rounded-xl shadow-sm p-4" onclick="showAssetDetail('asset4')">
+                            <div class="flex items-center">
+                                <img src="https://images.unsplash.com/photo-1527443224154-c4a3942d3acf" 
+                                    class="w-20 h-20 rounded-xl object-cover" alt="显示器">
+                                <div class="ml-4 flex-1">
+                                    <h3 class="font-semibold">27寸4K显示器</h3>
+                                    <p class="text-gray-600 text-sm">编号：AS-2024-004</p>
+                                    <p class="text-gray-600 text-sm">规格：Dell U2720Q</p>
+                                    <div class="flex items-center mt-1">
+                                        <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">电子设备</span>
+                                    </div>
+                                </div>
+                                <i class="fas fa-chevron-right text-gray-400"></i>
+                            </div>
+                        </div>
+                        
+                        <!-- 会议椅 -->
+                        <div class="bg-white rounded-xl shadow-sm p-4" onclick="showAssetDetail('asset5')">
+                            <div class="flex items-center">
+                                <img src="https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237" 
+                                    class="w-20 h-20 rounded-xl object-cover" alt="办公椅">
+                                <div class="ml-4 flex-1">
+                                    <h3 class="font-semibold">人体工学办公椅</h3>
+                                    <p class="text-gray-600 text-sm">编号：AS-2024-005</p>
+                                    <p class="text-gray-600 text-sm">规格：Herman Miller</p>
+                                    <div class="flex items-center mt-1">
+                                        <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">办公家具</span>
+                                    </div>
+                                </div>
+                                <i class="fas fa-chevron-right text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 资产详情页面 -->
+            <div id="asset-detail" class="page-container">
+                <div class="ios-header flex items-center">
+                    <button class="nav-back p-2">
+                        <i class="fas fa-chevron-left text-blue-500"></i>
+                    </button>
+                    <h1 class="text-xl font-semibold">资产详情</h1>
+                </div>
+
+                <div class="p-4 space-y-4">
+                    <!-- 总览信息 -->
+                    <div class="bg-white rounded-xl shadow-sm p-4">
+                        <h2 class="font-semibold mb-3 text-gray-800">总览</h2>
+                        <div class="grid grid-cols-1 gap-3 text-sm">
+                            <div class="flex justify-between py-2 border-b border-gray-100">
+                                <span class="text-gray-500">资产名称</span>
+                                <span class="text-gray-800">MacBook Pro</span>
+                            </div>
+                            <div class="flex justify-between py-2 border-b border-gray-100">
+                                <span class="text-gray-500">资产编码</span>
+                                <span class="text-gray-800">AS-2024-001</span>
+                            </div>
+                            <div class="flex justify-between py-2 border-b border-gray-100">
+                                <span class="text-gray-500">设备编码</span>
+                                <span class="text-gray-800">DEV-001-2024</span>
+                            </div>
+                            <div class="flex justify-between py-2 border-b border-gray-100">
+                                <span class="text-gray-500">品牌</span>
+                                <span class="text-gray-800">Apple</span>
+                            </div>
+                            <div class="flex justify-between py-2 border-b border-gray-100">
+                                <span class="text-gray-500">制造厂商</span>
+                                <span class="text-gray-800">Apple Inc.</span>
+                            </div>
+                            <div class="flex justify-between py-2 border-b border-gray-100">
+                                <span class="text-gray-500">规格型号</span>
+                                <span class="text-gray-800">13寸 M2芯片</span>
+                            </div>
+                            <div class="flex justify-between py-2 border-b border-gray-100">
+                                <span class="text-gray-500">资产类别</span>
+                                <span class="text-gray-800">电子设备</span>
+                            </div>
+                            <div class="flex justify-between py-2 border-b border-gray-100">
+                                <span class="text-gray-500">数量</span>
+                                <span class="text-gray-800">1台</span>
+                            </div>
+                            <div class="flex justify-between py-2 border-b border-gray-100">
+                                <span class="text-gray-500">入账日期</span>
+                                <span class="text-gray-800">2023-11-15</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 实物保管信息 -->
+                    <div class="bg-white rounded-xl shadow-sm p-4">
+                        <h2 class="font-semibold mb-3 text-gray-800">实物保管信息</h2>
+                        <div class="grid grid-cols-1 gap-3 text-sm">
+                            <div class="flex justify-between py-2 border-b border-gray-100">
+                                <span class="text-gray-500">资产保管人</span>
+                                <span class="text-gray-800">张三</span>
+                            </div>
+                            <div class="flex justify-between py-2 border-b border-gray-100">
+                                <span class="text-gray-500">资产保管部门</span>
+                                <span class="text-gray-800">研发部</span>
+                            </div>
+                            <div class="flex justify-between py-2 border-b border-gray-100">
+                                <span class="text-gray-500">资产保管地点</span>
+                                <span class="text-gray-800">A栋3层305室</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 资产价值信息 -->
+                    <div class="bg-white rounded-xl shadow-sm p-4">
+                        <h2 class="font-semibold mb-3 text-gray-800">资产价值信息</h2>
+                        <div class="grid grid-cols-1 gap-3 text-sm">
+                            <div class="flex justify-between py-2 border-b border-gray-100">
+                                <span class="text-gray-500">资产原值</span>
+                                <span class="text-gray-800">￥15,999</span>
+                            </div>
+                            <div class="flex justify-between py-2 border-b border-gray-100">
+                                <span class="text-gray-500">资产净值</span>
+                                <span class="text-gray-800">￥12,799</span>
+                            </div>
+                            <div class="flex justify-between py-2 border-b border-gray-100">
+                                <span class="text-gray-500">资产启用日期</span>
+                                <span class="text-gray-800">2023-12-01</span>
+                            </div>
+                            <div class="flex justify-between py-2 border-b border-gray-100">
+                                <span class="text-gray-500">预定使用年限</span>
+                                <span class="text-gray-800">4年</span>
+                            </div>
+                            <div class="flex justify-between py-2 border-b border-gray-100">
+                                <span class="text-gray-500">折旧率</span>
+                                <span class="text-gray-800">20%/年</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 操作按钮 -->
+                    <div class="space-y-3 mt-4">
+                        <div class="grid grid-cols-2 gap-3">
+                            <button data-type="internal" class="ios-button bg-white border border-blue-500 text-blue-500 hover:bg-blue-50">
+                                <div class="flex flex-col items-center justify-center">
+                                    <i class="fas fa-exchange-alt text-xl mb-1"></i>
+                                    <span>部门/单位内变更</span>
+                                </div>
+                            </button>
+                            <button data-type="transfer" class="ios-button bg-white border border-green-500 text-green-500 hover:bg-green-50">
+                                <div class="flex flex-col items-center justify-center">
+                                    <i class="fas fa-random text-xl mb-1"></i>
+                                    <span>跨部门/单位调拨</span>
+                                </div>
+                            </button>
+                        </div>
+                        <button data-type="scrap" class="ios-button bg-white border border-red-500 text-red-500 hover:bg-red-50">
+                            <div class="flex items-center justify-center">
+                                <i class="fas fa-trash-alt text-xl mr-2"></i>
+                                <span>资产报废</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 审批单据页面 -->
+            <div id="approvals" class="page-container">
+                <div class="ios-header">
+                    <h1 class="text-xl font-bold">审批单据</h1>
+                    <div class="flex border-b border-gray-200 mt-2">
+                        <div class="ios-tab active" id="tab-my-approvals">我提交的</div>
+                        <div class="ios-tab" id="tab-pending-approvals">待我审批</div>
+                    </div>
+                </div>
+                
+                <div id="my-approvals-content" class="px-4 pt-4">
+                    <!-- 我提交的审批 -->
+                    <div class="bg-white rounded-xl shadow-sm p-4 mb-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-semibold">资产调拨申请</span>
+                            <span class="status-badge status-pending">审批中</span>
+                        </div>
+                        <div class="text-sm text-gray-600">
+                            <p>申请时间：2024-03-15</p>
+                            <p>资产名称：MacBook Pro</p>
+                            <p>调拨至：市场部</p>
+                        </div>
+                        <div class="mt-3 border-t border-gray-100 pt-3">
+                            <div class="flex items-center text-xs text-gray-500">
+                                <i class="fas fa-clock mr-1"></i>
+                                <span>等待部门主管审批</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-sm p-4 mb-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-semibold">资产报废申请</span>
+                            <span class="status-badge status-rejected">已驳回</span>
+                        </div>
+                        <div class="text-sm text-gray-600">
+                            <p>申请时间：2024-02-28</p>
+                            <p>资产名称：旧打印机</p>
+                            <p>报废原因：设备老化</p>
+                        </div>
+                        <div class="mt-3 border-t border-gray-100 pt-3">
+                            <div class="flex items-center text-xs text-red-500">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                <span>驳回原因：请提供设备检测报告</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-sm p-4 mb-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-semibold">部门内变更申请</span>
+                            <span class="status-badge status-approved">已通过</span>
+                        </div>
+                        <div class="text-sm text-gray-600">
+                            <p>申请时间：2024-01-10</p>
+                            <p>资产名称：会议椅 x5</p>
+                            <p>变更原因：办公室调整</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="pending-approvals-content" class="px-4 pt-4 hidden">
+                    <!-- 待我审批的 -->
+                    <div class="bg-white rounded-xl shadow-sm p-4 mb-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-semibold">资产调拨申请</span>
+                            <span class="status-badge status-pending">待审批</span>
+                        </div>
+                        <div class="text-sm text-gray-600">
+                            <p>申请人：李四</p>
+                            <p>申请时间：2024-03-20</p>
+                            <p>资产名称：Dell笔记本电脑</p>
+                            <p>调拨至：财务部</p>
+                        </div>
+                        <div class="flex space-x-2 mt-3">
+                            <button class="flex-1 py-2 px-4 bg-green-500 text-white rounded-lg text-sm">通过</button>
+                            <button class="flex-1 py-2 px-4 bg-red-500 text-white rounded-lg text-sm">驳回</button>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-sm p-4 mb-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-semibold">盘点异常申请</span>
+                            <span class="status-badge status-pending">待审批</span>
+                        </div>
+                        <div class="text-sm text-gray-600">
+                            <p>申请人：王五</p>
+                            <p>申请时间：2024-03-18</p>
+                            <p>资产名称：投影仪</p>
+                            <p>异常类型：资产信息有误</p>
+                        </div>
+                        <div class="flex space-x-2 mt-3">
+                            <button class="flex-1 py-2 px-4 bg-green-500 text-white rounded-lg text-sm">通过</button>
+                            <button class="flex-1 py-2 px-4 bg-red-500 text-white rounded-lg text-sm">驳回</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 资产盘点页面 -->
+            <div id="inventory" class="page-container">
+                <div class="ios-header">
+                    <h1 class="text-xl font-bold">资产盘点</h1>
+                </div>
+                
+                <div class="px-4 pt-4">
+                    <!-- 盘点总览 -->
+                    <div class="bg-white rounded-xl shadow-sm p-4 mb-4">
+                        <h2 class="font-semibold mb-2">2024年第一季度盘点</h2>
+                        <div class="flex justify-between text-sm text-gray-600">
+                            <span>盘点日期：2024-03-15至03-30</span>
+                            <span>进度：60%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+                            <div class="bg-blue-600 h-2.5 rounded-full" style="width: 60%"></div>
+                        </div>
+                        <div class="flex justify-between text-xs text-gray-500 mt-1">
+                            <span>已盘点：12/20</span>
+                            <span>剩余时间：5天</span>
+                        </div>
+                    </div>
+
+                    <!-- 待盘点资产列表 -->
+                    <div class="bg-white rounded-xl shadow-sm p-4 mb-4">
+                        <h3 class="font-semibold mb-3">待盘点资产</h3>
+                        
+                        <div id="asset-inventory-1" class="border-b border-gray-100 pb-4 mb-4">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="font-medium">MacBook Pro <span id="status-1" class="text-green-600 text-sm ml-2 hidden">已盘点</span></p>
+                                    <p class="text-sm text-gray-600">编号：AS-2024-001</p>
+                                    <p class="text-sm text-gray-600">保管地点：研发部</p>
+                                </div>
+                                <div id="buttons-1" class="flex gap-2">
+                                    <button onclick="inventoryAsset('1', 'success')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm">
+                                        盘点一致
+                                    </button>
+                                    <button onclick="inventoryAsset('1', 'error')" class="bg-red-500 text-white py-1 px-3 rounded-lg text-sm">
+                                        信息有误
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="asset-inventory-2" class="border-b border-gray-100 pb-4 mb-4">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="font-medium">4K激光投影仪 <span id="status-2" class="text-green-600 text-sm ml-2 hidden">已盘点</span></p>
+                                    <p class="text-sm text-gray-600">编号：AS-2024-003</p>
+                                    <p class="text-sm text-gray-600">保管地点：会议室</p>
+                                </div>
+                                <div id="buttons-2" class="flex gap-2">
+                                    <button onclick="inventoryAsset('2', 'success')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm">
+                                        盘点一致
+                                    </button>
+                                    <button onclick="inventoryAsset('2', 'error')" class="bg-red-500 text-white py-1 px-3 rounded-lg text-sm">
+                                        信息有误
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="asset-inventory-3" class="border-b border-gray-100 pb-4 mb-4">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="font-medium">27寸4K显示器 <span id="status-3" class="text-green-600 text-sm ml-2 hidden">已盘点</span></p>
+                                    <p class="text-sm text-gray-600">编号：AS-2024-004</p>
+                                    <p class="text-sm text-gray-600">保管地点：设计部</p>
+                                </div>
+                                <div id="buttons-3" class="flex gap-2">
+                                    <button onclick="inventoryAsset('3', 'success')" class="bg-green-500 text-white py-1 px-3 rounded-lg text-sm">
+                                        盘点一致
+                                    </button>
+                                    <button onclick="inventoryAsset('3', 'error')" class="bg-red-500 text-white py-1 px-3 rounded-lg text-sm">
+                                        信息有误
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 已盘点资产 -->
+                    <div class="bg-white rounded-xl shadow-sm p-4 mb-4">
+                        <h3 class="font-semibold mb-3">已盘点资产</h3>
+                        
+                        <div class="border-b border-gray-100 pb-4 mb-4 opacity-70">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="font-medium">人体工学办公桌 <span class="text-green-600 text-sm ml-2">已盘点</span></p>
+                                    <p class="text-sm text-gray-600">编号：AS-2024-002</p>
+                                    <p class="text-sm text-gray-600">保管地点：研发部</p>
+                                </div>
+                                <div class="text-xs text-gray-500">
+                                    2024-03-16
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="border-b border-gray-100 pb-4 mb-4 opacity-70">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="font-medium">人体工学办公椅 <span class="text-green-600 text-sm ml-2">已盘点</span></p>
+                                    <p class="text-sm text-gray-600">编号：AS-2024-005</p>
+                                    <p class="text-sm text-gray-600">保管地点：研发部</p>
+                                </div>
+                                <div class="text-xs text-gray-500">
+                                    2024-03-17
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 修改审批表单页面 -->
+            <div id="approval-form-page" class="page-container hidden h-full">
+                <div class="ios-header flex items-center bg-white">
+                    <button class="nav-back p-2">
+                        <i class="fas fa-chevron-left text-blue-500"></i>
+                    </button>
+                    <h1 class="text-xl font-medium" id="approval-title">跨部门调拨</h1>
+                </div>
+                
+                <!-- 修改滚动容器的样式 -->
+                <div class="flex flex-col h-[calc(100vh-60px)]">
+                    <!-- 内容区域 -->
+                    <div class="flex-1 overflow-y-auto">
+                        <div class="p-4 space-y-4">
+                            <form id="approval-form" class="space-y-4">
+                                <!-- 申请信息卡片 -->
+                                <div class="bg-white rounded-lg p-4 space-y-3">
+                                    <div class="text-sm text-gray-600">
+                                        <div class="flex justify-between py-2 border-b border-gray-100">
+                                            <span class="text-gray-500">申请人</span>
+                                            <span class="text-gray-800">张三</span>
+                                        </div>
+                                        <div class="flex justify-between py-2 border-b border-gray-100">
+                                            <span class="text-gray-500">申请公司</span>
+                                            <span class="text-gray-800">环宇互联网金融有限公司</span>
+                                        </div>
+                                        <div class="flex justify-between py-2 border-b border-gray-100">
+                                            <span class="text-gray-500">申请部门</span>
+                                            <span class="text-gray-800">平台产品部</span>
+                                        </div>
+                                        <div class="flex justify-between py-2">
+                                            <span class="text-gray-500">申请日期</span>
+                                            <span class="text-gray-800">2024-03-22</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 资产信息卡片 -->
+                                <div class="bg-white rounded-lg p-4">
+                                    <h3 class="font-medium mb-3 text-gray-800">资产信息</h3>
+                                    <div class="text-sm space-y-3">
+                                        <div class="flex justify-between py-2 border-b border-gray-100">
+                                            <span class="text-gray-500">资产名称</span>
+                                            <span class="text-gray-800">MacBook Pro</span>
+                                        </div>
+                                        <div class="flex justify-between py-2 border-b border-gray-100">
+                                            <span class="text-gray-500">资产编号</span>
+                                            <span class="text-gray-800">AS-2024-001</span>
+                                        </div>
+                                        <div class="flex justify-between py-2">
+                                            <span class="text-gray-500">规格型号</span>
+                                            <span class="text-gray-800">13寸 M2芯片</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 跨部门/单位调拨表单字段 -->
+                                <div id="transfer-fields" class="hidden space-y-4">
+                                    <div class="bg-white rounded-lg p-4 space-y-4">
+                                        <h3 class="font-medium mb-2 text-gray-800">调拨信息</h3>
+                                        
+                                        <div class="space-y-3">
+                                            <!-- 本部/处室实物管理人 -->
+                                            <div>
+                                                <label class="block text-sm text-gray-500 mb-2">本部/处室实物管理人</label>
+                                                <select name="current-manager" class="w-full bg-gray-50 rounded-lg px-3 py-2.5 text-sm border-0 focus:ring-2 focus:ring-blue-500" required>
+                                                    <option value="">请选择...</option>
+                                                    <option>张三 (资产管理员)</option>
+                                                    <option>李四 (部门管理员)</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <!-- 调入单位 -->
+                                            <div>
+                                                <label class="block text-sm text-gray-500 mb-2">调入单位</label>
+                                                <select name="target-company" class="w-full bg-gray-50 rounded-lg px-3 py-2.5 text-sm border-0 focus:ring-2 focus:ring-blue-500" required>
+                                                    <option value="">请选择...</option>
+                                                    <option>总公司</option>
+                                                    <option>分公司A</option>
+                                                    <option>分公司B</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <!-- 调入部门 -->
+                                            <div>
+                                                <label class="block text-sm text-gray-500 mb-2">调入部门</label>
+                                                <select name="target-department" class="w-full bg-gray-50 rounded-lg px-3 py-2.5 text-sm border-0 focus:ring-2 focus:ring-blue-500" required>
+                                                    <option value="">请选择...</option>
+                                                    <option>市场部</option>
+                                                    <option>财务部</option>
+                                                    <option>人力资源部</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <!-- 调入保管人 -->
+                                            <div>
+                                                <label class="block text-sm text-gray-500 mb-2">调入保管人</label>
+                                                <select name="target-keeper" class="w-full bg-gray-50 rounded-lg px-3 py-2.5 text-sm border-0 focus:ring-2 focus:ring-blue-500" required>
+                                                    <option value="">请先选择调入部门...</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <!-- 存放地点 -->
+                                            <div>
+                                                <label class="block text-sm text-gray-500 mb-2">存放地点</label>
+                                                <input type="text" name="target-location" class="w-full bg-gray-50 rounded-lg px-3 py-2.5 text-sm border-0 focus:ring-2 focus:ring-blue-500" placeholder="请输入具体存放位置" required>
+                                            </div>
+                                            
+                                            <!-- 调入单位实物管理人 -->
+                                            <div>
+                                                <label class="block text-sm text-gray-500 mb-2">调入单位实物管理人</label>
+                                                <select name="target-asset-manager" class="w-full bg-gray-50 rounded-lg px-3 py-2.5 text-sm border-0 focus:ring-2 focus:ring-blue-500" required>
+                                                    <option value="">请先选择调入单位...</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <!-- 调拨日期 -->
+                                            <div>
+                                                <label class="block text-sm text-gray-500 mb-2">调拨日期</label>
+                                                <input type="date" name="transfer-date" class="w-full bg-gray-50 rounded-lg px-3 py-2.5 text-sm border-0 focus:ring-2 focus:ring-blue-500" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 资产报废表单字段 -->
+                                <div id="scrap-fields" class="hidden space-y-4">
+                                    <div class="bg-white rounded-lg p-4 space-y-4">
+                                        <h3 class="font-medium mb-2 text-gray-800">报废信息</h3>
+                                        
+                                        <div class="space-y-3">
+                                            <!-- 本单位实物保管人 -->
+                                            <div>
+                                                <label class="block text-sm text-gray-500 mb-2">本单位实物保管人</label>
+                                                <select name="company-keeper" class="w-full bg-gray-50 rounded-lg px-3 py-2.5 text-sm border-0 focus:ring-2 focus:ring-blue-500" required>
+                                                    <option value="">请选择...</option>
+                                                    <option>张三 (资产管理员)</option>
+                                                    <option>李四 (部门管理员)</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <!-- 本部实物保管人 -->
+                                            <div>
+                                                <label class="block text-sm text-gray-500 mb-2">本部实物保管人</label>
+                                                <select name="department-keeper" class="w-full bg-gray-50 rounded-lg px-3 py-2.5 text-sm border-0 focus:ring-2 focus:ring-blue-500" required>
+                                                    <option value="">请选择...</option>
+                                                    <option>王五 (技术部)</option>
+                                                    <option>赵六 (业务部)</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <!-- 报废类型 -->
+                                            <div>
+                                                <label class="block text-sm text-gray-500 mb-2">报废类型</label>
+                                                <select name="scrap-type" class="w-full bg-gray-50 rounded-lg px-3 py-2.5 text-sm border-0 focus:ring-2 focus:ring-blue-500" required>
+                                                    <option value="">请选择...</option>
+                                                    <option>设备损坏</option>
+                                                    <option>技术落后</option>
+                                                    <option>超过使用年限</option>
+                                                    <option>其他原因</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <!-- 设备状态描述 -->
+                                            <div>
+                                                <label class="block text-sm text-gray-500 mb-2">设备状态描述</label>
+                                                <textarea name="scrap-description" class="w-full bg-gray-50 rounded-lg px-3 py-2.5 text-sm border-0 focus:ring-2 focus:ring-blue-500 min-h-[100px]" placeholder="请详细描述设备的当前状态..." required></textarea>
+                                            </div>
+                                            
+                                            <!-- 报废日期 -->
+                                            <div>
+                                                <label class="block text-sm text-gray-500 mb-2">报废日期</label>
+                                                <input type="date" name="scrap-date" class="w-full bg-gray-50 rounded-lg px-3 py-2.5 text-sm border-0 focus:ring-2 focus:ring-blue-500" required>
+                                            </div>
+                                            
+                                            <!-- 预估残值 -->
+                                            <div>
+                                                <label class="block text-sm text-gray-500 mb-2">预估残值 (元)</label>
+                                                <input type="number" name="estimated-value" min="0" step="0.01" class="w-full bg-gray-50 rounded-lg px-3 py-2.5 text-sm border-0 focus:ring-2 focus:ring-blue-500" placeholder="0.00" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 部门内变更表单字段 -->
+                                <div id="internal-fields" class="hidden space-y-4">
+                                    <div class="bg-white rounded-lg p-4 space-y-4">
+                                        <h3 class="font-medium mb-2 text-gray-800">变更信息</h3>
+                                        
+                                        <div class="space-y-3">
+                                            <!-- 本部/处室实物管理人 -->
+                                            <div>
+                                                <label class="block text-sm text-gray-500 mb-2">本部/处室实物管理人</label>
+                                                <select name="current-manager" class="w-full bg-gray-50 rounded-lg px-3 py-2.5 text-sm border-0 focus:ring-2 focus:ring-blue-500" required>
+                                                    <option value="">请选择...</option>
+                                                    <option>张三 (资产管理员)</option>
+                                                    <option>李四 (部门管理员)</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <!-- 本单位实物保管人 -->
+                                            <div>
+                                                <label class="block text-sm text-gray-500 mb-2">本单位实物保管人</label>
+                                                <select name="company-keeper" class="w-full bg-gray-50 rounded-lg px-3 py-2.5 text-sm border-0 focus:ring-2 focus:ring-blue-500" required>
+                                                    <option value="">请选择...</option>
+                                                    <option>王五 (技术部)</option>
+                                                    <option>赵六 (业务部)</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <!-- 本部实物保管人 -->
+                                            <div>
+                                                <label class="block text-sm text-gray-500 mb-2">本部实物保管人</label>
+                                                <select name="department-keeper" class="w-full bg-gray-50 rounded-lg px-3 py-2.5 text-sm border-0 focus:ring-2 focus:ring-blue-500" required>
+                                                    <option value="">请选择...</option>
+                                                    <option>王五 (技术部)</option>
+                                                    <option>赵六 (业务部)</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <!-- 变更后保管人 -->
+                                            <div>
+                                                <label class="block text-sm text-gray-500 mb-2">变更后保管人</label>
+                                                <select name="new-keeper" class="w-full bg-gray-50 rounded-lg px-3 py-2.5 text-sm border-0 focus:ring-2 focus:ring-blue-500" required>
+                                                    <option value="">请选择...</option>
+                                                    <option>刘七 (研发部)</option>
+                                                    <option>孙八 (测试部)</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <!-- 存放地点 -->
+                                            <div>
+                                                <label class="block text-sm text-gray-500 mb-2">存放地点</label>
+                                                <input type="text" name="location" class="w-full bg-gray-50 rounded-lg px-3 py-2.5 text-sm border-0 focus:ring-2 focus:ring-blue-500" placeholder="请输入具体存放位置" required>
+                                            </div>
+                                            
+                                            <!-- 变更日期 -->
+                                            <div>
+                                                <label class="block text-sm text-gray-500 mb-2">变更日期</label>
+                                                <input type="date" name="change-date" class="w-full bg-gray-50 rounded-lg px-3 py-2.5 text-sm border-0 focus:ring-2 focus:ring-blue-500" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- 盘点异常表单字段 -->
+                                <div id="inventory-error-fields" class="hidden space-y-4">
+                                    <div class="bg-white rounded-lg p-4 space-y-4">
+                                        <h3 class="font-medium mb-2 text-gray-800">盘点异常信息</h3>
+                                        
+                                        <div class="space-y-3">
+                                            <!-- 盘点人 -->
+                                            <div>
+                                                <label class="block text-sm text-gray-500 mb-2">盘点人</label>
+                                                <select name="inventory-person" class="w-full bg-gray-50 rounded-lg px-3 py-2.5 text-sm border-0 focus:ring-2 focus:ring-blue-500" required>
+                                                    <option value="">请选择...</option>
+                                                    <option>张三 (资产管理员)</option>
+                                                    <option>李四 (部门管理员)</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <!-- 异常类型 -->
+                                            <div>
+                                                <label class="block text-sm text-gray-500 mb-2">异常类型</label>
+                                                <select name="error-type" class="w-full bg-gray-50 rounded-lg px-3 py-2.5 text-sm border-0 focus:ring-2 focus:ring-blue-500" required>
+                                                    <option value="">请选择...</option>
+                                                    <option>资产盘亏</option>
+                                                    <option>资产保管人有误</option>
+                                                    <option>资产信息内容有误</option>
+                                                    <option>其他类型</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <!-- 盘点日期 -->
+                                            <div>
+                                                <label class="block text-sm text-gray-500 mb-2">盘点日期</label>
+                                                <input type="date" name="inventory-date" class="w-full bg-gray-50 rounded-lg px-3 py-2.5 text-sm border-0 focus:ring-2 focus:ring-blue-500" required>
+                                            </div>
+                                            
+                                            <!-- 异常说明 -->
+                                            <div>
+                                                <label class="block text-sm text-gray-500 mb-2">异常说明</label>
+                                                <textarea name="error-description" class="w-full bg-gray-50 rounded-lg px-3 py-2.5 text-sm border-0 focus:ring-2 focus:ring-blue-500 min-h-[100px]" placeholder="请详细描述盘点异常情况..." required></textarea>
+                                            </div>
+                                            
+                                            <!-- 处理建议 -->
+                                            <div>
+                                                <label class="block text-sm text-gray-500 mb-2">处理建议</label>
+                                                <textarea name="suggestion" class="w-full bg-gray-50 rounded-lg px-3 py-2.5 text-sm border-0 focus:ring-2 focus:ring-blue-500 min-h-[80px]" placeholder="请提出处理建议..." required></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- 申请说明 -->
+                                <div class="bg-white rounded-lg p-4 space-y-3">
+                                    <h3 class="font-medium mb-2 text-gray-800">申请说明</h3>
+                                    <textarea name="reason" class="w-full bg-gray-50 rounded-lg px-3 py-2.5 text-sm border-0 focus:ring-2 focus:ring-blue-500 min-h-[100px]" placeholder="请详细描述申请原因..."></textarea>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- 提交按钮固定在底部 -->
+                    <div class="bg-white border-t border-gray-100">
+                        <div class="p-4">
+                            <button type="submit" form="approval-form" class="w-full bg-blue-500 text-white rounded-lg py-3 font-medium active:bg-blue-600">
+                                提交申请
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 同样修改盘点表单页面的结构 -->
+            <div id="inventory-form-page" class="page-container hidden h-full">
+                <div class="ios-header flex items-center bg-white">
+                    <button class="nav-back p-2">
+                        <i class="fas fa-chevron-left text-blue-500"></i>
+                    </button>
+                    <h1 class="text-xl font-medium" id="inventory-title">盘点结果</h1>
+                </div>
+                
+                <!-- 修改滚动容器的样式 -->
+                <div class="flex flex-col h-[calc(100vh-60px)]">
+                    <!-- 内容区域 -->
+                    <div class="flex-1 overflow-y-auto">
+                        <div class="p-4 space-y-4">
+                            <form id="inventory-form" class="space-y-4">
+                                <!-- 资产信息卡片 -->
+                                <div class="bg-white rounded-lg p-4">
+                                    <h3 class="font-medium mb-3 text-gray-800">资产信息</h3>
+                                    <div class="text-sm space-y-3">
+                                        <div class="flex justify-between py-2 border-b border-gray-100">
+                                            <span class="text-gray-500">资产名称</span>
+                                            <span class="text-gray-800">MacBook Pro</span>
+                                        </div>
+                                        <div class="flex justify-between py-2 border-b border-gray-100">
+                                            <span class="text-gray-500">资产编号</span>
+                                            <span class="text-gray-800">AS-2024-001</span>
+                                        </div>
+                                        <div class="flex justify-between py-2">
+                                            <span class="text-gray-500">保管地点</span>
+                                            <span class="text-gray-800">研发部</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 盘点一致表单 -->
+                                <div id="inventory-success-fields" class="hidden">
+                                    <div class="bg-white rounded-lg p-4 space-y-4">
+                                        <h3 class="font-medium mb-2 text-gray-800">盘点确认</h3>
+                                        <div class="space-y-3">
+                                            <div class="flex items-center justify-center py-4">
+                                                <div class="bg-green-100 rounded-full p-3">
+                                                    <i class="fas fa-check text-green-500 text-2xl"></i>
+                                                </div>
+                                            </div>
+                                            <p class="text-center text-gray-700">确认该资产信息完全一致？</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 信息有误表单 -->
+                                <div id="inventory-error-fields" class="hidden">
+                                    <div class="bg-white rounded-lg p-4 space-y-4">
+                                        <h3 class="font-medium mb-2 text-gray-800">异常信息</h3>
+                                        <div class="space-y-3">
+                                            <div>
+                                                <label class="block text-sm text-gray-500 mb-2">问题类型</label>
+                                                <select name="problem-type" class="w-full bg-gray-50 rounded-lg px-3 py-2.5 text-sm border-0 focus:ring-2 focus:ring-blue-500" required>
+                                                    <option value="">请选择...</option>
+                                                    <option>资产盘亏</option>
+                                                    <option>资产保管人有误</option>
+                                                    <option>资产信息内容有误</option>
+                                                    <option>其他类型</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <div>
+                                                <label class="block text-sm text-gray-500 mb-2">问题说明</label>
+                                                <textarea name="description" class="w-full bg-gray-50 rounded-lg px-3 py-2.5 text-sm border-0 focus:ring-2 focus:ring-blue-500 min-h-[100px]" placeholder="请详细描述问题..." required></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- 提交按钮固定在底部 -->
+                    <div class="bg-white border-t border-gray-100">
+                        <div class="p-4">
+                            <button type="submit" form="inventory-form" class="w-full bg-blue-500 text-white rounded-lg py-3 font-medium active:bg-blue-600">
+                                确认提交
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 添加审批详情页面 -->
+            <div id="approval-detail-page" class="page-container hidden">
+                <div class="ios-header flex items-center">
+                    <button class="nav-back p-2">
+                        <i class="fas fa-chevron-left text-blue-500"></i>
+                    </button>
+                    <h1 class="text-xl font-semibold">审批详情</h1>
+                </div>
+                
+                <div class="p-4 space-y-4">
+                    <div class="bg-white rounded-xl shadow-sm p-4">
+                        <div class="flex justify-between items-center mb-3">
+                            <h2 class="font-semibold text-lg" id="approval-detail-title">资产调拨申请</h2>
+                            <span class="status-badge" id="approval-detail-status">审批中</span>
+                        </div>
+                        
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">申请时间</span>
+                                <span id="approval-detail-time">2024-03-20</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">申请人</span>
+                                <span id="approval-detail-applicant">张三</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">资产名称</span>
+                                <span id="approval-detail-asset-name">MacBook Pro</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">资产编号</span>
+                                <span id="approval-detail-asset-code">AS-2024-001</span>
+                            </div>
+                            <div id="approval-detail-extra-info" class="space-y-2">
+                                <!-- 动态加载的额外信息 -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-sm p-4">
+                        <h3 class="font-semibold mb-2">申请原因</h3>
+                        <p id="approval-detail-reason" class="text-gray-700 text-sm">设备需要升级，申请调拨新设备</p>
+                    </div>
+                    
+                    <!-- 审批操作区域 -->
+                    <div id="approval-actions" class="bg-white rounded-xl shadow-sm p-4">
+                        <h3 class="font-semibold mb-3">审批操作</h3>
+                        <div class="flex space-x-3">
+                            <button id="btn-approve" class="ios-button bg-green-500 flex-1">同意</button>
+                            <button id="btn-reject" class="ios-button bg-red-500 flex-1">拒绝</button>
+                        </div>
+                    </div>
+                    
+                    <!-- 拒绝原因表单 -->
+                    <div id="reject-reason-form" class="bg-white rounded-xl shadow-sm p-4 hidden">
+                        <h3 class="font-semibold mb-3">拒绝原因</h3>
+                        <textarea id="reject-reason" class="ios-input" rows="3" placeholder="请输入拒绝原因..."></textarea>
+                        <div class="flex space-x-3 mt-3">
+                            <button id="btn-cancel-reject" class="ios-button bg-gray-400 flex-1">取消</button>
+                            <button id="btn-confirm-reject" class="ios-button bg-red-500 flex-1">确认拒绝</button>
+                        </div>
+                    </div>
+                    
+                    <!-- 审批历史 -->
+                    <div class="bg-white rounded-xl shadow-sm p-4">
+                        <h3 class="font-semibold mb-3">审批流程</h3>
+                        <div class="space-y-3" id="approval-flow">
+                            <div class="flex items-start">
+                                <div class="w-6 h-6 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs">1</div>
+                                <div class="ml-3">
+                                    <div class="font-medium">提交申请</div>
+                                    <div class="text-xs text-gray-500">2024-03-20 10:30 · 张三</div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start">
+                                <div class="w-6 h-6 rounded-full bg-gray-300 text-white flex items-center justify-center text-xs">2</div>
+                                <div class="ml-3">
+                                    <div class="font-medium">部门主管审批</div>
+                                    <div class="text-xs text-gray-500">等待审批</div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start">
+                                <div class="w-6 h-6 rounded-full bg-gray-300 text-white flex items-center justify-center text-xs">3</div>
+                                <div class="ml-3">
+                                    <div class="font-medium">资产管理员确认</div>
+                                    <div class="text-xs text-gray-500">等待处理</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 添加筛选弹窗 -->
+            <div id="filter-modal" class="ios-modal hidden">
+                <div class="ios-modal-content rounded-t-xl bg-white">
+                    <div class="flex justify-between items-center py-3 px-4 border-b border-gray-200">
+                        <h3 class="font-semibold">筛选条件</h3>
+                        <button id="btn-close-filter" class="text-gray-400">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="p-4 space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">资产类别</label>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="py-1 px-3 bg-blue-100 text-blue-800 rounded-full text-sm">电子设备</span>
+                                <span class="py-1 px-3 bg-gray-100 text-gray-800 rounded-full text-sm">办公家具</span>
+                                <span class="py-1 px-3 bg-gray-100 text-gray-800 rounded-full text-sm">会议设备</span>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">保管部门</label>
+                            <select class="ios-input py-2">
+                                <option value="">全部</option>
+                                <option>研发部</option>
+                                <option>市场部</option>
+                                <option>财务部</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">入账时间</label>
+                            <div class="flex space-x-2">
+                                <input type="date" class="ios-input py-2 flex-1">
+                                <span class="flex items-center">至</span>
+                                <input type="date" class="ios-input py-2 flex-1">
+                            </div>
+                        </div>
+                        
+                        <div class="flex space-x-3 mt-4">
+                            <button class="ios-button bg-gray-200 text-gray-800 flex-1 py-2">重置</button>
+                            <button class="ios-button flex-1 py-2">应用筛选</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 添加统计分析页面 -->
+            <div id="asset-stats" class="page-container hidden">
+                <div class="ios-header flex items-center">
+                    <button class="nav-back p-2">
+                        <i class="fas fa-chevron-left text-blue-500"></i>
+                    </button>
+                    <h1 class="text-xl font-semibold">资产统计</h1>
+                </div>
+                
+                <div class="p-4 space-y-4">
+                    <!-- 资产总览 -->
+                    <div class="bg-white rounded-xl shadow-sm p-4">
+                        <h2 class="font-semibold mb-3">资产总览</h2>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-blue-50 p-3 rounded-lg">
+                                <div class="text-sm text-gray-600">资产总数</div>
+                                <div class="text-2xl font-bold text-blue-600">42</div>
+                            </div>
+                            <div class="bg-green-50 p-3 rounded-lg">
+                                <div class="text-sm text-gray-600">资产总值</div>
+                                <div class="text-2xl font-bold text-green-600">¥186,450</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 资产分布 -->
+                    <div class="bg-white rounded-xl shadow-sm p-4">
+                        <h2 class="font-semibold mb-3">类别分布</h2>
+                        <div class="space-y-3">
+                            <div>
+                                <div class="flex justify-between text-sm">
+                                    <span>电子设备</span>
+                                    <span>45%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+                                    <div class="bg-blue-600 h-2 rounded-full" style="width: 45%"></div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="flex justify-between text-sm">
+                                    <span>办公家具</span>
+                                    <span>30%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+                                    <div class="bg-green-600 h-2 rounded-full" style="width: 30%"></div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="flex justify-between text-sm">
+                                    <span>会议设备</span>
+                                    <span>15%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+                                    <div class="bg-purple-600 h-2 rounded-full" style="width: 15%"></div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="flex justify-between text-sm">
+                                    <span>其他资产</span>
+                                    <span>10%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+                                    <div class="bg-yellow-600 h-2 rounded-full" style="width: 10%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 部门分布 -->
+                    <div class="bg-white rounded-xl shadow-sm p-4">
+                        <h2 class="font-semibold mb-3">部门分布</h2>
+                        <div class="space-y-3">
+                            <div>
+                                <div class="flex justify-between text-sm">
+                                    <span>研发部</span>
+                                    <span>40%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+                                    <div class="bg-blue-600 h-2 rounded-full" style="width: 40%"></div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="flex justify-between text-sm">
+                                    <span>市场部</span>
+                                    <span>25%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+                                    <div class="bg-green-600 h-2 rounded-full" style="width: 25%"></div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="flex justify-between text-sm">
+                                    <span>财务部</span>
+                                    <span>20%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+                                    <div class="bg-purple-600 h-2 rounded-full" style="width: 20%"></div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="flex justify-between text-sm">
+                                    <span>其他部门</span>
+                                    <span>15%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+                                    <div class="bg-yellow-600 h-2 rounded-full" style="width: 15%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 资产状态 -->
+                    <div class="bg-white rounded-xl shadow-sm p-4">
+                        <h2 class="font-semibold mb-3">资产状态</h2>
+                        <div class="flex justify-between text-center">
+                            <div>
+                                <div class="text-xl font-bold text-green-600">32</div>
+                                <div class="text-sm text-gray-600">正常</div>
+                            </div>
+                            <div>
+                                <div class="text-xl font-bold text-yellow-600">5</div>
+                                <div class="text-sm text-gray-600">维修中</div>
+                            </div>
+                            <div>
+                                <div class="text-xl font-bold text-red-600">3</div>
+                                <div class="text-sm text-gray-600">报废</div>
+                            </div>
+                            <div>
+                                <div class="text-xl font-bold text-blue-600">2</div>
+                                <div class="text-sm text-gray-600">待交付</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部导航栏 -->
+        <nav class="bottom-nav">
+            <div class="flex justify-around items-center h-16">
+                <a href="#my-assets" class="flex flex-col items-center text-blue-600">
+                    <i class="fas fa-box text-xl"></i>
+                    <span class="text-xs">我的资产</span>
+                </a>
+                <a href="#approvals" class="flex flex-col items-center text-gray-600">
+                    <i class="fas fa-clipboard-list text-xl"></i>
+                    <span class="text-xs">审批单据</span>
+                </a>
+                <a href="#inventory" class="flex flex-col items-center text-gray-600">
+                    <i class="fas fa-tasks text-xl"></i>
+                    <span class="text-xs">资产盘点</span>
+                </a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- JavaScript 部分 -->
+    <script>
+        // 页面导航管理系统 - 重构版
+        const PageManager = {
+            // 存储所有页面引用
+            pages: {},
+            // 导航历史
+            history: [],
+            // 当前显示的页面
+            currentPage: null,
+            
+            // 初始化函数
+            init() {
+                // 注册所有页面
+                const pageElements = document.querySelectorAll('.page-container');
+                pageElements.forEach(page => {
+                    this.pages[page.id] = page;
+                });
+                
+                // 设置初始页面
+                this.currentPage = 'my-assets';
+                
+                // 绑定所有返回按钮
+                document.querySelectorAll('.nav-back').forEach(btn => {
+                    btn.addEventListener('click', () => this.goBack());
+                });
+                
+                // 绑定底部导航
+                this.setupBottomNav();
+                
+                // 绑定资产卡片点击事件
+                this.setupAssetCards();
+                
+                // 绑定审批项点击事件
+                this.setupApprovalItems();
+                
+                // 绑定盘点按钮事件
+                this.setupInventoryButtons();
+            },
+            
+            // 设置底部导航栏
+            setupBottomNav() {
+                document.querySelectorAll('nav a').forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const targetId = e.currentTarget.getAttribute('href').substring(1);
+                        
+                        // 如果点击当前页面，不做任何操作
+                        if (targetId === this.currentPage) return;
+                        
+                        // 更新底部导航样式
+                        document.querySelectorAll('nav a').forEach(a => {
+                            a.classList.remove('text-blue-600');
+                            a.classList.add('text-gray-600');
+                        });
+                        e.currentTarget.classList.remove('text-gray-600');
+                        e.currentTarget.classList.add('text-blue-600');
+                        
+                        // 导航到主页面
+                        this.navigateToMain(targetId);
+                    });
+                });
+            },
+            
+            // 设置资产卡片点击事件
+            setupAssetCards() {
+                document.querySelectorAll('[onclick^="showAssetDetail"]').forEach(card => {
+                    const match = card.getAttribute('onclick').match(/'(.*?)'/);
+                    if (match && match[1]) {
+                        const assetId = match[1];
+                        card.removeAttribute('onclick');
+                        card.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            this.showAssetDetail(assetId);
+                        });
+                    }
+                });
+            },
+            
+            // 设置审批列表项点击事件
+            setupApprovalItems() {
+                const bindApprovalItem = (item, index, type) => {
+                    item.style.cursor = 'pointer';
+                    item.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        this.showApprovalDetail(`${type}-${index}`);
+                    });
+                };
+
+                // 绑定我的审批列表项
+                document.querySelectorAll('#my-approvals-content .bg-white.rounded-xl').forEach((item, index) => {
+                    bindApprovalItem(item, index, 'my');
+                });
+                
+                // 绑定待审批列表项
+                document.querySelectorAll('#pending-approvals-content .bg-white.rounded-xl').forEach((item, index) => {
+                    bindApprovalItem(item, index, 'pending');
+                });
+            },
+            
+            // 导航到主页面（底部导航栏使用）
+            navigateToMain(pageId) {
+                // 重置历史记录
+                this.history = [];
+                
+                // 移除所有页面的 active 类和样式
+                Object.values(this.pages).forEach(page => {
+                    page.classList.remove('active');
+                    page.classList.add('hidden');
+                    page.style.transform = '';
+                    page.style.opacity = '';
+                });
+                
+                // 显示目标页面
+                const targetPage = this.pages[pageId];
+                targetPage.classList.remove('hidden');
+                targetPage.classList.add('active');
+                targetPage.style.transform = 'translateX(0)';
+                targetPage.style.opacity = '1';
+                
+                this.currentPage = pageId;
+                
+                // 更新底部导航状态
+                this.updateBottomNav(pageId);
+            },
+            
+            // 添加更新底部导航状态的方法
+            updateBottomNav(pageId) {
+                document.querySelectorAll('.bottom-nav a').forEach(link => {
+                    const linkPageId = link.getAttribute('href').substring(1);
+                    if (linkPageId === pageId) {
+                        link.classList.remove('text-gray-600');
+                        link.classList.add('text-blue-600');
+                    } else {
+                        link.classList.remove('text-blue-600');
+                        link.classList.add('text-gray-600');
+                    }
+                });
+            },
+            
+            // 修改 navigateTo 方法
+            navigateTo(pageId, data) {
+                if (this.currentPage === pageId) return;
+                
+                const currentPageElement = this.pages[this.currentPage];
+                const targetPageElement = this.pages[pageId];
+                
+                if (!currentPageElement || !targetPageElement) {
+                    console.error('页面元素不存在');
+                    return;
+                }
+
+                // 准备动画
+                targetPageElement.style.transform = 'translateX(100%)';
+                targetPageElement.classList.remove('hidden');
+                
+                // 触发重排
+                void targetPageElement.offsetWidth;
+                
+                // 执行动画
+                currentPageElement.style.transform = 'translateX(-30%)';
+                currentPageElement.style.opacity = '0.7';
+                targetPageElement.style.transform = 'translateX(0)';
+                targetPageElement.style.opacity = '1';
+                
+                // 更新状态
+                setTimeout(() => {
+                    currentPageElement.classList.add('hidden');
+                    currentPageElement.style.transform = '';
+                    currentPageElement.style.opacity = '';
+                    targetPageElement.classList.add('active');
+                    
+                    this.currentPage = pageId;
+                    
+                    if (data) {
+                        this.loadPageData(pageId, data);
+                    }
+                }, 300);
+            },
+            
+            // 返回上一页
+            goBack() {
+                if (this.history.length === 0) {
+                    // 如果没有历史记录，则返回到主页面
+                    this.navigateToMain('my-assets');
+                    return;
+                }
+                
+                const prevPageId = this.history.pop();
+                const currentPageElement = this.pages[this.currentPage];
+                const prevPageElement = this.pages[prevPageId];
+                
+                if (!currentPageElement || !prevPageElement) {
+                    console.error('页面元素不存在');
+                    return;
+                }
+
+                // 准备动画
+                prevPageElement.style.transform = 'translateX(-30%)';
+                prevPageElement.style.opacity = '0.7';
+                prevPageElement.classList.remove('hidden');
+                
+                // 触发重排
+                void prevPageElement.offsetWidth;
+                
+                // 执行动画
+                currentPageElement.style.transform = 'translateX(100%)';
+                currentPageElement.style.opacity = '0';
+                prevPageElement.style.transform = 'translateX(0)';
+                prevPageElement.style.opacity = '1';
+                
+                // 更新状态
+                setTimeout(() => {
+                    currentPageElement.classList.remove('active');
+                    currentPageElement.classList.add('hidden');
+                    currentPageElement.style.transform = '';
+                    currentPageElement.style.opacity = '';
+                    prevPageElement.classList.add('active');
+                    
+                    const oldPage = this.currentPage;
+                    this.currentPage = prevPageId;
+                    
+                    // 如果返回到审批单据页面，刷新列表
+                    if (prevPageId === 'approvals') {
+                        this.refreshApprovalsList();
+                    }
+                    
+                    // 如果从审批详情页返回，确保返回到审批单据列表页
+                    if (oldPage === 'approval-detail-page' && 
+                       (prevPageId !== 'approvals' && prevPageId !== 'my-assets' && prevPageId !== 'inventory')) {
+                        // 给一点时间让动画完成
+                        setTimeout(() => this.navigateToMain('approvals'), 350);
+                    }
+                    
+                    // 如果从审批表单或盘点表单返回到审批详情页，则继续返回到列表页
+                    if ((oldPage === 'approval-form-page' && prevPageId === 'approval-detail-page') ||
+                        (oldPage === 'inventory-form-page' && prevPageId === 'inventory')) {
+                        // 给一点时间让动画完成
+                        setTimeout(() => this.goBack(), 350);
+                    }
+                }, 300);
+            },
+            
+            // 加载页面数据
+            loadPageData(pageId, data) {
+                switch(pageId) {
+                    case 'asset-detail':
+                        this.loadAssetDetail(data.assetId);
+                        break;
+                    case 'approval-form-page':
+                        this.setupApprovalForm(data.type, data.assetId);
+                        break;
+                    case 'inventory-form-page':
+                        this.setupInventoryForm(data.result, data.assetId);
+                        break;
+                    case 'approval-detail-page':
+                        this.loadApprovalDetail(data.approvalId);
+                        break;
+                }
+            },
+            
+            // 资产详情页面数据加载
+            loadAssetDetail(assetId) {
+                console.log(`加载资产详情: ${assetId}`);
+                
+                // 保存资产ID到页面元素
+                this.pages['asset-detail'].dataset.assetId = assetId;
+                
+                // 绑定资产详情页面的操作按钮
+                document.querySelectorAll('#asset-detail .ios-button').forEach(btn => {
+                    const type = btn.dataset.type;
+                    if (type) {
+                        btn.onclick = () => this.showApprovalForm(type, assetId);
+                    }
+                });
+            },
+            
+            // 设置审批表单
+            setupApprovalForm(type, assetId) {
+                console.log(`设置审批表单: ${type}, 资产: ${assetId}`);
+                
+                // 更新表单标题
+                let formTitle = "审批申请";
+                switch(type) {
+                    case 'internal': 
+                        formTitle = "部门内变更";
+                        break;
+                    case 'transfer': 
+                        formTitle = "跨部门调拨";
+                        break;
+                    case 'scrap': 
+                        formTitle = "资产报废";
+                        break;
+                }
+                document.getElementById('approval-title').textContent = formTitle;
+                
+                // 隐藏所有字段组
+                const allFields = ['internal-fields', 'transfer-fields', 'scrap-fields', 'inventory-error-fields'];
+                allFields.forEach(fieldId => {
+                    const element = document.getElementById(fieldId);
+                    if (element) {
+                        element.classList.add('hidden');
+                    }
+                });
+                
+                // 显示对应的字段组
+                const targetFields = document.getElementById(`${type}-fields`);
+                if (targetFields) {
+                    targetFields.classList.remove('hidden');
+                }
+                
+                // 设置表单数据
+                document.getElementById('approval-form-page').dataset.approvalType = type;
+                document.getElementById('approval-form-page').dataset.assetId = assetId;
+                
+                // 绑定表单提交事件
+                const form = document.getElementById('approval-form');
+                if (form) {
+                    form.onsubmit = (e) => {
+                        e.preventDefault();
+                        const reason = form.querySelector('[name="reason"]').value;
+                        if (!reason) {
+                            showMessage('请填写申请说明', 'error');
+                            return false;
+                        }
+                        
+                        // 提交成功，返回上一页
+                        showMessage('申请已提交成功');
+                        this.goBack();
+                        return false;
+                    };
+                }
+            },
+            
+            // 设置盘点表单
+            setupInventoryForm(result, assetId) {
+                console.log(`设置盘点表单: ${result}, 资产: ${assetId}`);
+                
+                // 更新表单标题
+                let formTitle = result === 'success' ? "盘点确认" : "盘点异常";
+                document.getElementById('inventory-title').textContent = formTitle;
+                
+                // 隐藏所有字段组，只显示相关字段
+                document.querySelectorAll('#inventory-form-page [id$="-fields"]').forEach(
+                    fields => fields.classList.add('hidden')
+                );
+                document.getElementById(`inventory-${result}-fields`)?.classList.remove('hidden');
+                
+                // 设置资产信息
+                document.getElementById('inventory-form-page').dataset.resultType = result;
+                document.getElementById('inventory-form-page').dataset.assetId = assetId;
+                
+                // 这里可以根据assetId设置资产信息
+            },
+            
+            // 显示资产详情页面
+            showAssetDetail(assetId) {
+                // 保存当前页面到历史记录
+                this.history.push(this.currentPage);
+                
+                // 导航到资产详情页面
+                this.navigateTo('asset-detail', {assetId});
+            },
+            
+            // 显示审批表单页面
+            showApprovalForm(type, assetId) {
+                // 保存当前页面ID到历史记录
+                this.history.push(this.currentPage);
+                
+                // 导航到审批表单页面
+                this.navigateTo('approval-form-page', {type, assetId});
+                
+                // 设置表单页面的资产ID，用于返回时重新加载资产详情
+                this.pages['approval-form-page'].dataset.assetId = assetId;
+            },
+            
+            // 显示盘点表单页面
+            showInventoryForm(result, assetId) {
+                this.navigateTo('inventory-form-page', {result, assetId});
+            },
+            
+            // 添加审批详情页面相关功能
+            showApprovalDetail(approvalId) {
+                this.navigateTo('approval-detail-page', {approvalId});
+            },
+            
+            // 加载审批详情数据
+            loadApprovalDetail(approvalId) {
+                console.log(`加载审批详情: ${approvalId}`);
+                
+                // 解析审批ID，获取类型
+                const [type, id] = approvalId.split('-');
+                
+                // 根据类型获取不同的审批数据
+                let approvalData = {
+                    title: "审批申请",
+                    status: "pending", // pending, approved, rejected
+                    time: "2024-03-22",
+                    applicant: "张三",
+                    assetName: "MacBook Pro",
+                    assetCode: "AS-2024-001",
+                    type: "transfer", // internal, transfer, scrap, inventory
+                    reason: "设备需要升级，申请调拨新设备"
+                };
+                
+                // 根据不同类型显示不同的表单内容
+                switch(type) {
+                    case 'my':
+                        approvalData.title = "资产调拨申请";
+                        approvalData.type = "transfer";
+                        break;
+                    case 'pending':
+                        // 根据ID选择不同的待审批类型
+                        if (id === '0') {
+                            approvalData.title = "资产调拨申请";
+                            approvalData.type = "transfer";
+                            approvalData.applicant = "李四";
+                            approvalData.assetName = "Dell笔记本电脑";
+                            approvalData.department = "财务部";
+                        } else {
+                            approvalData.title = "盘点异常申请";
+                            approvalData.type = "inventory";
+                            approvalData.applicant = "王五";
+                            approvalData.assetName = "投影仪";
+                            approvalData.errorType = "资产信息有误";
+                        }
+                        break;
+                }
+                
+                // 更新界面内容
+                document.getElementById('approval-detail-title').textContent = approvalData.title;
+                
+                const statusElement = document.getElementById('approval-detail-status');
+                statusElement.textContent = approvalData.status === 'pending' ? '审批中' : 
+                                           (approvalData.status === 'approved' ? '已通过' : '已拒绝');
+                statusElement.className = 'status-badge ' + 
+                                         (approvalData.status === 'pending' ? 'status-pending' : 
+                                         (approvalData.status === 'approved' ? 'status-approved' : 'status-rejected'));
+                
+                document.getElementById('approval-detail-time').textContent = approvalData.time;
+                document.getElementById('approval-detail-applicant').textContent = approvalData.applicant;
+                document.getElementById('approval-detail-asset-name').textContent = approvalData.assetName;
+                document.getElementById('approval-detail-asset-code').textContent = approvalData.assetCode;
+                document.getElementById('approval-detail-reason').textContent = approvalData.reason;
+                
+                // 根据类型显示额外信息
+                const extraInfoElement = document.getElementById('approval-detail-extra-info');
+                extraInfoElement.innerHTML = '';
+                
+                switch(approvalData.type) {
+                    case 'internal':
+                        extraInfoElement.innerHTML = `
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">变更类型</span>
+                                <span>部门/单位内变更</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">本部/处室实物管理人</span>
+                                <span>张三 (资产管理员)</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">本单位实物保管人</span>
+                                <span>王五 (技术部)</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">本部实物保管人</span>
+                                <span>赵六 (业务部)</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">变更后保管人</span>
+                                <span>刘七 (研发部)</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">存放地点</span>
+                                <span>A栋3层306室</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">变更日期</span>
+                                <span>2024-03-22</span>
+                            </div>
+                        `;
+                        break;
+                    case 'transfer':
+                        extraInfoElement.innerHTML = `
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">变更类型</span>
+                                <span>跨部门调拨</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">本部/处室实物管理人</span>
+                                <span>张三 (资产管理员)</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">调入单位</span>
+                                <span>总公司</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">调入部门</span>
+                                <span>${approvalData.department || '市场部'}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">调入保管人</span>
+                                <span>王五</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">存放地点</span>
+                                <span>B栋2层203室</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">调入单位实物管理人</span>
+                                <span>李四 (部门管理员)</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">调拨日期</span>
+                                <span>2024-03-22</span>
+                            </div>
+                        `;
+                        break;
+                    case 'scrap':
+                        extraInfoElement.innerHTML = `
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">变更类型</span>
+                                <span>资产报废</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">本单位实物保管人</span>
+                                <span>张三 (资产管理员)</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">本部实物保管人</span>
+                                <span>王五 (技术部)</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">报废类型</span>
+                                <span>设备损坏</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">设备状态描述</span>
+                                <span>屏幕破损，无法正常显示</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">报废日期</span>
+                                <span>2024-03-22</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">预估残值</span>
+                                <span>¥500.00</span>
+                            </div>
+                        `;
+                        break;
+                    case 'inventory':
+                        extraInfoElement.innerHTML = `
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">变更类型</span>
+                                <span>盘点异常</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">盘点人</span>
+                                <span>张三 (资产管理员)</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">异常类型</span>
+                                <span>${approvalData.errorType || '资产信息有误'}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">盘点日期</span>
+                                <span>2024-03-20</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">异常说明</span>
+                                <span>设备序列号与系统记录不符</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">处理建议</span>
+                                <span>更新系统记录</span>
+                            </div>
+                        `;
+                        break;
+                }
+                
+                // 判断是否显示审批操作区域
+                const isNeedApproval = approvalData.status === 'pending';
+                document.getElementById('approval-actions').classList.toggle('hidden', !isNeedApproval);
+                
+                // 绑定审批操作按钮事件
+                document.getElementById('btn-approve').onclick = () => this.approveRequest(approvalId);
+                document.getElementById('btn-reject').onclick = () => {
+                    // 显示拒绝原因表单
+                    document.getElementById('approval-actions').classList.add('hidden');
+                    document.getElementById('reject-reason-form').classList.remove('hidden');
+                };
+                
+                // 绑定拒绝原因表单事件
+                document.getElementById('btn-cancel-reject').onclick = () => {
+                    // 取消拒绝，隐藏表单，显示审批操作区
+                    document.getElementById('reject-reason-form').classList.add('hidden');
+                    document.getElementById('approval-actions').classList.remove('hidden');
+                };
+                
+                document.getElementById('btn-confirm-reject').onclick = () => {
+                    const reason = document.getElementById('reject-reason').value.trim();
+                    if (!reason) {
+                        showMessage('请输入拒绝原因', 'error');
+                        return;
+                    }
+                    this.rejectRequest(approvalId, reason);
+                };
+            },
+            
+            // 审批通过处理
+            approveRequest(approvalId) {
+                console.log(`通过审批: ${approvalId}`);
+                
+                // 实际应用中应发送API请求
+                
+                // 更新状态
+                document.getElementById('approval-detail-status').textContent = '已通过';
+                document.getElementById('approval-detail-status').className = 'status-badge status-approved';
+                
+                // 隐藏审批操作区
+                document.getElementById('approval-actions').classList.add('hidden');
+                
+                // 更新审批流程
+                const approvalFlow = document.getElementById('approval-flow');
+                const flowItems = approvalFlow.querySelectorAll('.flex.items-start');
+                if (flowItems.length > 1) {
+                    const currentStep = flowItems[1];
+                    currentStep.querySelector('.w-6.h-6').className = 'w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center text-xs';
+                    currentStep.querySelector('.text-xs.text-gray-500').textContent = `2024-03-22 15:45 · ${getCurrentUserName()} · 已通过`;
+                }
+                
+                // 显示成功提示
+                showMessage('审批已通过');
+            },
+            
+            // 审批拒绝处理
+            rejectRequest(approvalId, rejectReason) {
+                console.log(`拒绝审批: ${approvalId}, 原因: ${rejectReason}`);
+                
+                // 实际应用中应发送API请求
+                
+                // 更新状态
+                document.getElementById('approval-detail-status').textContent = '已拒绝';
+                document.getElementById('approval-detail-status').className = 'status-badge status-rejected';
+                
+                // 隐藏拒绝原因表单
+                document.getElementById('reject-reason-form').classList.add('hidden');
+                
+                // 更新审批流程
+                const approvalFlow = document.getElementById('approval-flow');
+                const flowItems = approvalFlow.querySelectorAll('.flex.items-start');
+                if (flowItems.length > 1) {
+                    const currentStep = flowItems[1];
+                    currentStep.querySelector('.w-6.h-6').className = 'w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center text-xs';
+                    currentStep.querySelector('.text-xs.text-gray-500').textContent = `2024-03-22 15:45 · ${getCurrentUserName()} · 已拒绝`;
+                    
+                    // 添加拒绝原因
+                    const reasonDiv = document.createElement('div');
+                    reasonDiv.className = 'text-xs text-red-500 mt-1';
+                    reasonDiv.textContent = `拒绝原因: ${rejectReason}`;
+                    currentStep.querySelector('.ml-3').appendChild(reasonDiv);
+                }
+                
+                // 显示提示
+                showMessage('审批已拒绝');
+            },
+            
+            // 添加盘点按钮事件
+            setupInventoryButtons() {
+                document.querySelectorAll('[onclick^="inventoryAsset"]').forEach(button => {
+                    const match = button.getAttribute('onclick').match(/inventoryAsset\('(.+?)',\s*'(.+?)'\)/);
+                    if (match && match[1] && match[2]) {
+                        const assetId = match[1];
+                        const result = match[2];
+                        button.removeAttribute('onclick');
+                        button.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            this.showInventoryForm(result, assetId);
+                        });
+                    }
+                });
+            },
+            
+            // 添加资产详情页操作按钮绑定
+            setupAssetDetailButtons() {
+                document.querySelectorAll('#asset-detail .ios-button').forEach(btn => {
+                    const type = btn.dataset.type;
+                    if (type) {
+                        btn.onclick = null; // 清除可能存在的旧事件
+                        btn.addEventListener('click', () => {
+                            const assetId = this.getCurrentAssetId();
+                            this.showApprovalForm(type, assetId);
+                        });
+                    }
+                });
+            },
+            
+            // 获取当前资产ID的辅助方法
+            getCurrentAssetId() {
+                // 在实际应用中，应该从当前页面状态或DOM中获取
+                // 这里简化处理，返回一个固定值
+                return 'asset1';
+            },
+
+            // 添加刷新审批列表的方法
+            refreshApprovalsList() {
+                // 这里可以添加刷新列表的逻辑
+                console.log('刷新审批列表');
+            }
+        };
+
+        // 统一的消息提示函数
+        function showMessage(message, type = 'success') {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `fixed top-4 left-0 right-0 mx-auto w-4/5 px-4 py-3 rounded-lg text-center z-50 ${
+                type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+            }`;
+            messageDiv.style.maxWidth = '300px';
+            messageDiv.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} mr-2"></i>${message}`;
+            document.body.appendChild(messageDiv);
+            
+            setTimeout(() => {
+                messageDiv.classList.add('opacity-0');
+                messageDiv.style.transition = 'opacity 0.5s ease-out';
+                setTimeout(() => messageDiv.remove(), 500);
+            }, 2000);
+        }
+
+        // 获取当前用户名
+        function getCurrentUserName() {
+            return '李经理'; // 实际应用中应从用户信息获取
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            // 初始化页面管理器
+            PageManager.init();
+            
+            // 设置初始页面状态
+            document.getElementById('my-assets').classList.add('active');
+            
+            // 绑定审批表单提交事件
+            document.getElementById('approval-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const formContainer = document.getElementById('approval-form-page');
+                const approvalType = formContainer.dataset.approvalType;
+                const assetId = formContainer.dataset.assetId;
+                
+                // 表单验证
+                if (!formData.get('reason')) {
+                    showMessage('请填写申请原因', 'error');
+                    return;
+                }
+                
+                // 创建审批记录
+                createNewApproval(approvalType, 
+                                document.getElementById('approval-title').textContent, 
+                                '资产名称', // 这里应该从assetId获取
+                                '资产编号', // 这里应该从assetId获取
+                                formData.get('reason'));
+                
+                // 返回上一页
+                PageManager.goBack();
+                
+                // 显示成功提示
+                showMessage('申请已成功提交');
+            });
+            
+            // 绑定盘点表单提交事件
+            document.getElementById('inventory-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const formContainer = document.getElementById('inventory-form-page');
+                const resultType = formContainer.dataset.resultType;
+                const assetId = formContainer.dataset.assetId;
+                
+                if (resultType === 'error') {
+                    // 验证必填字段
+                    if (!formData.get('problem-type') || !formData.get('description')) {
+                        showMessage('请完善表单信息', 'error');
+                        return;
+                    }
+                    
+                    // 创建盘点异常审批
+                    createNewApproval('inventory', '盘点异常申请', 
+                                     '资产名称', // 这里应该从assetId获取
+                                     '资产编号', // 这里应该从assetId获取
+                                     formData.get('description'));
+                }
+                
+                // 更新资产状态
+                document.getElementById(`status-${assetId}`).classList.remove('hidden');
+                document.getElementById(`buttons-${assetId}`).classList.add('hidden');
+                
+                // 返回上一页
+                PageManager.goBack();
+                
+                // 显示成功提示
+                showMessage('盘点已完成');
+            });
+            
+            // 绑定审批标签页切换
+            document.getElementById('tab-my-approvals').addEventListener('click', function() {
+                this.classList.add('active');
+                document.getElementById('tab-pending-approvals').classList.remove('active');
+                document.getElementById('my-approvals-content').classList.remove('hidden');
+                document.getElementById('pending-approvals-content').classList.add('hidden');
+            });
+
+            document.getElementById('tab-pending-approvals').addEventListener('click', function() {
+                this.classList.add('active');
+                document.getElementById('tab-my-approvals').classList.remove('active');
+                document.getElementById('my-approvals-content').classList.add('hidden');
+                document.getElementById('pending-approvals-content').classList.remove('hidden');
+            });
+        });
+
+        // 盘点资产处理函数
+        function inventoryAsset(assetId, result) {
+            // 保存当前页面到历史记录
+            PageManager.history.push(PageManager.currentPage);
+            
+            // 导航到盘点表单页面
+            PageManager.navigateTo('inventory-form-page', {result, assetId});
+            
+            // 设置表单提交事件
+            document.getElementById('inventory-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // 显示成功提示
+                showMessage('盘点已完成');
+                
+                // 更新资产状态
+                document.getElementById(`status-${assetId}`).classList.remove('hidden');
+                document.getElementById(`buttons-${assetId}`).classList.add('hidden');
+                
+                // 返回到盘点列表页面
+                PageManager.goBack();
+            });
+        }
+
+        // 创建新的审批记录
+        function createNewApproval(type, title, assetName, assetCode, reason) {
+            const approvalItem = document.createElement('div');
+            approvalItem.className = 'bg-white rounded-xl shadow-sm p-4 mb-4';
+            
+            let statusBadge = '<span class="status-badge status-submitted">已提交</span>';
+            let extraInfo = '';
+            
+            switch(type) {
+                case 'internal':
+                    extraInfo = '<p>变更类型：部门内变更</p>';
+                    break;
+                case 'transfer':
+                    extraInfo = '<p>变更类型：跨部门调拨</p>';
+                    break;
+                case 'scrap':
+                    extraInfo = '<p>变更类型：资产报废</p>';
+                    break;
+                case 'inventory':
+                    extraInfo = '<p>变更类型：盘点异常</p>';
+                    break;
+            }
+            
+            approvalItem.innerHTML = `
+                <div class="flex justify-between items-center mb-2">
+                    <span class="font-semibold">${title}</span>
+                    ${statusBadge}
+                </div>
+                <div class="text-sm text-gray-600">
+                    <p>申请时间：${new Date().toLocaleDateString()}</p>
+                    <p>资产名称：${assetName}</p>
+                    <p>资产编号：${assetCode}</p>
+                    ${extraInfo}
+                    <p>申请原因：${reason}</p>
+                </div>
+                <div class="mt-3 border-t border-gray-100 pt-3">
+                    <div class="flex items-center text-xs text-gray-500">
+                        <i class="fas fa-clock mr-1"></i>
+                        <span>等待部门主管审批</span>
+                    </div>
+                </div>
+            `;
+            
+            const myApprovalsContent = document.getElementById('my-approvals-content');
+            myApprovalsContent.insertBefore(approvalItem, myApprovalsContent.firstChild);
+        }
+
+        // 更新盘点状态
+        function updateInventoryStatus(assetId, resultType) {
+            const statusSpan = document.getElementById(`status-${assetId}`);
+            const buttonsDiv = document.getElementById(`buttons-${assetId}`);
+            
+            statusSpan.classList.remove('hidden');
+            buttonsDiv.classList.add('hidden');
+            
+            if (resultType === 'error') {
+                statusSpan.textContent = '已报异常';
+                statusSpan.classList.add('text-red-600');
+                statusSpan.classList.remove('text-green-600');
+            } else {
+                statusSpan.textContent = '已盘点';
+            }
+        }
+
+        // 更新盘点进度
+        function updateInventoryProgress() {
+            const progressBar = document.querySelector('.bg-blue-600');
+            const progressText = document.querySelector('.flex.justify-between.text-sm.text-gray-600 span:last-child');
+            const countText = document.querySelector('.flex.justify-between.text-xs.text-gray-500.mt-1 span:first-child');
+            
+            let currentProgress = parseInt(progressBar.style.width) || 60;
+            let newProgress = Math.min(currentProgress + 5, 100);
+            progressBar.style.width = `${newProgress}%`;
+            
+            progressText.textContent = `进度：${newProgress}%`;
+            
+            let [current, total] = countText.textContent.split('：')[1].split('/');
+            current = parseInt(current) + 1;
+            countText.textContent = `已盘点：${current}/${total}`;
+        }
+    </script>
+</body>
+</html>

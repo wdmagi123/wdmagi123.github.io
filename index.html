@@ -10,52 +10,6 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: #f5f5f5;
         }
-        /* 筛选区域样式 */
-    .filter-section {
-        display: flex;
-        gap: 10px; /* 减小间距 */
-        margin-bottom: 10px; /* 减小底部间距 */
-        align-items: center;
-        flex-wrap: wrap;
-    }
-    
-    .filter-item {
-        display: flex;
-        align-items: center;
-        gap: 5px;
-    }
-    
-    .filter-item label {
-        font-size: 12px; /* 减小字体大小 */
-        color: #555; /* 更加柔和的颜色 */
-    }
-    
-    .filter-item select {
-        padding: 4px 8px; /* 减小内边距 */
-        border: 1px solid #ccc; /* 更加柔和的边框 */
-        border-radius: 4px;
-        min-width: 100px; /* 设置最小宽度 */
-        font-size: 12px; /* 减小字体大小 */
-    }
-    
-    /* 筛选按钮样式 */
-    #apply-filter, #clear-filter {
-        padding: 4px 8px; /* 减小内边距 */
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 12px; /* 减小字体大小 */
-    }
-    
-    #apply-filter {
-        background-color: #3b82f6;
-        color: white;
-    }
-    
-    #clear-filter {
-        background-color: #e5e7eb;
-        color: #374151;
-    }
         .app-container {
             max-width: 414px;
             height: 736px;
@@ -374,7 +328,7 @@
             </div>
         </div>
 
-<!-- 1-1. 部门内变更申请页面 - 更紧凑的布局 -->
+<!-- 1-1. 部门/单位内变更申请页面 - 更紧凑的布局 -->
 <div id="deptChange" class="screen p-3">
     <div class="flex items-center mb-3">
         <button onclick="backToAssetDetail()" class="mr-2">
@@ -382,7 +336,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
             </svg>
         </button>
-        <h1 class="text-xl font-bold">部门内变更</h1>
+        <h1 class="text-xl font-bold">部门/单位内变更</h1>
     </div>
     
     <div class="bg-white rounded-xl shadow-sm p-3 mb-3">
@@ -502,13 +456,13 @@
     </div>
     
     <div class="flex justify-center">
-        <button onclick="submitApproval('部门内变更')" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-lg text-sm">
+        <button onclick="submitApproval('部门/单位内变更')" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-lg text-sm">
             提交审批
         </button>
     </div>
 </div>
 
-<!-- 1-2. 跨部门调拨申请页面 - 更紧凑的布局 -->
+<!-- 1-2. 跨部门/单位调拨申请页面 - 更紧凑的布局 -->
 <div id="crossDeptTransfer" class="screen p-3">
     <div class="flex items-center mb-3">
         <button onclick="backToAssetDetail()" class="mr-2">
@@ -516,7 +470,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
             </svg>
         </button>
-        <h1 class="text-xl font-bold">跨部门调拨</h1>
+        <h1 class="text-xl font-bold">跨部门/单位调拨</h1>
     </div>
     
     <div class="bg-white rounded-xl shadow-sm p-3 mb-3">
@@ -666,7 +620,7 @@
     </div>
     
     <div class="flex justify-center">
-        <button onclick="submitApproval('跨部门调拨')" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-lg text-sm">
+        <button onclick="submitApproval('跨部门/单位调拨')" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-lg text-sm">
             提交审批
         </button>
     </div>
@@ -818,7 +772,7 @@
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="font-bold">部门内变更申请</h3>
+                                <h3 class="font-bold">部门/单位内变更申请</h3>
                                 <p class="text-sm text-gray-500">Dell U2720Q 显示器</p>
                             </div>
                         </div>
@@ -838,7 +792,7 @@
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="font-bold">跨部门调拨申请</h3>
+                                <h3 class="font-bold">跨部门/单位调拨申请</h3>
                                 <p class="text-sm text-gray-500">iPhone 13 Pro 手机</p>
                             </div>
                         </div>
@@ -904,7 +858,7 @@
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="font-bold">部门内变更申请</h3>
+                                <h3 class="font-bold">部门/单位内变更申请</h3>
                                 <p class="text-sm text-gray-500">Dell U2720Q 显示器</p>
                             </div>
                         </div>
@@ -950,7 +904,7 @@
     
     <div class="bg-white rounded-xl shadow-sm p-4 mb-4">
         <div class="flex justify-between items-center mb-3">
-            <h2 id="approvalDetailTitle" class="text-lg font-bold">部门内变更申请</h2>
+            <h2 id="approvalDetailTitle" class="text-lg font-bold">部门/单位内变更申请</h2>
             <span id="approvalDetailStatus" class="inline-block px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">待审批</span>
         </div>
         
@@ -1123,33 +1077,6 @@
             
             <!-- 待盘点资产列表 -->
             <h3 class="font-bold mb-2">待盘点资产</h3>
-              <!-- 添加筛选区域 -->
-    <div class="filter-section">
-        <div class="filter-item">
-            <label for="department-filter">保管部门：</label>
-            <select id="department-filter">
-                <option value="">全部</option>
-                <option value="">财务资产部</option>
-                <option value="">办公室</option>
-                <!-- 部门选项将通过JavaScript动态生成 -->
-            </select>
-        </div>
-        <div class="filter-item">
-            <label for="custodian-filter">保管人：</label>
-            <select id="custodian-filter">
-                <option value="">全部</option>
-                <option value="">张三</option>
-                <option value="">李四</option>
-                <!-- 保管人选项将通过JavaScript动态生成 -->
-            </select>
-        </div>
-        <!-- <button id="apply-filter" class="btn">应用筛选</button>
-        <button id="clear-filter" class="btn">清除筛选</button> -->
-    </div>
-    
-
-
-
             <div class="bg-white p-3 rounded-xl shadow-sm mb-3" onclick="showInventoryCheck()">
                 <div class="flex">
                     <div class="mr-3 rounded-lg overflow-hidden" style="width: 60px; height: 60px;">
@@ -1531,88 +1458,6 @@
     </div>
 
     <script>
-          // 初始化筛选功能
-    function initializeFilters() {
-        const assets = JSON.parse(localStorage.getItem('assets')) || [];
-        const departmentFilter = document.getElementById('department-filter');
-        const custodianFilter = document.getElementById('custodian-filter');
-        
-        // 获取唯一的部门和保管人列表
-        const departments = [...new Set(assets.map(asset => asset.department))];
-        const custodians = [...new Set(assets.map(asset => asset.custodian))];
-        
-        // 添加部门选项
-        departments.forEach(dept => {
-            if (dept) { // 确保不为空
-                const option = document.createElement('option');
-                option.value = dept;
-                option.textContent = dept;
-                departmentFilter.appendChild(option);
-            }
-        });
-        
-        // 添加保管人选项
-        custodians.forEach(person => {
-            if (person) { // 确保不为空
-                const option = document.createElement('option');
-                option.value = person;
-                option.textContent = person;
-                custodianFilter.appendChild(option);
-            }
-        });
-        
-        // 筛选功能
-        document.getElementById('apply-filter').addEventListener('click', applyFilters);
-        document.getElementById('clear-filter').addEventListener('click', clearFilters);
-    }
-    
-    // 应用筛选
-    function applyFilters() {
-        const departmentValue = document.getElementById('department-filter').value;
-        const custodianValue = document.getElementById('custodian-filter').value;
-        
-        const assets = JSON.parse(localStorage.getItem('assets')) || [];
-        let filteredAssets = [...assets];
-        
-        // 按部门筛选
-        if (departmentValue) {
-            filteredAssets = filteredAssets.filter(asset => asset.department === departmentValue);
-        }
-        
-        // 按保管人筛选
-        if (custodianValue) {
-            filteredAssets = filteredAssets.filter(asset => asset.custodian === custodianValue);
-        }
-        
-        // 重新渲染表格
-        renderAssetTable(filteredAssets);
-    }
-    
-    // 清除筛选
-    function clearFilters() {
-        document.getElementById('department-filter').value = '';
-        document.getElementById('custodian-filter').value = '';
-        
-        // 重新渲染表格，显示所有资产
-        const assets = JSON.parse(localStorage.getItem('assets')) || [];
-        renderAssetTable(assets);
-    }
-    
-    // 修改渲染资产表格函数以接受筛选后的资产
-    function renderAssetTable(assetsToRender = null) {
-        const assets = assetsToRender || JSON.parse(localStorage.getItem('assets')) || [];
-        const tableBody = document.querySelector('#asset-table tbody');
-        tableBody.innerHTML = '';
-        
-        // 渲染表格逻辑...
-        // ... existing code ...
-    }
-    
-    // 页面加载后初始化筛选功能
-    document.addEventListener('DOMContentLoaded', function() {
-        // ... existing code ...
-        initializeFilters();
-    });
         // 页面切换函数
         function showTab(tabId) {
             // 隐藏所有页面
@@ -1643,13 +1488,13 @@
             document.getElementById('myAssets').classList.add('active');
         }
         
-        // 显示部门内变更申请
+        // 显示部门/单位内变更申请
         function showDeptChange() {
             document.getElementById('assetDetail').classList.remove('active');
             document.getElementById('deptChange').classList.add('active');
         }
         
-        // 显示跨部门调拨申请
+        // 显示跨部门/单位调拨申请
         function showCrossDeptTransfer() {
             document.getElementById('assetDetail').classList.remove('active');
             document.getElementById('crossDeptTransfer').classList.add('active');
@@ -1663,9 +1508,11 @@
         
         // 返回资产详情
         function backToAssetDetail() {
+            // 隐藏所有页面
             document.querySelectorAll('.screen').forEach(screen => {
                 screen.classList.remove('active');
             });
+            // 显示资产详情页面
             document.getElementById('assetDetail').classList.add('active');
         }
         
@@ -1682,8 +1529,15 @@
             document.getElementById('approvalModal').classList.add('hidden');
         }
         
-        // 确认提交审批
-        function confirmApproval() {
+        // 同意审批
+        function approveApproval() {
+            // 显示选择审批人弹窗
+            document.getElementById('modalApprovalType').textContent = '审批通过';
+            document.getElementById('approvalModal').classList.remove('hidden');
+        }
+        
+      // 确认提交审批
+      function confirmApproval() {
             // 获取选中的审批人
             const approverSelect = document.getElementById('approver-select');
             const approver = approverSelect.options[approverSelect.selectedIndex].text;
@@ -1699,14 +1553,33 @@
             
             // 显示提交成功弹窗
             document.getElementById('successModal').classList.remove('hidden');
+            
+            // 根据审批类型设置返回的界面
+            const approvalType = document.getElementById('modalApprovalType').textContent;
+            if (approvalType === '部门/单位内变更' || approvalType === '跨部门/单位调拨' || approvalType === '资产报废') {
+                // 如果是我的资产的单据提交界面，返回资产详情界面
+                document.getElementById('successModal').onclick = function() {
+                    closeSuccessModal();
+                    backToAssetDetail();
+                };
+            } else if (approvalType === '资产盘点信息有误') {
+                // 如果是资产盘点的信息有误，返回资产盘点界面
+                document.getElementById('successModal').onclick = function() {
+                    closeSuccessModal();
+                    backToInventory();
+                };
+            } else if (approvalType === '审批通过') {
+                // 如果是审批通过，返回审批列表
+                document.getElementById('successModal').onclick = function() {
+                    closeSuccessModal();
+                    backToApprovals();
+                };
+            }
         }
-        
-        // 关闭成功提示弹窗并返回上一级
+
+        // 关闭成功提示弹窗
         function closeSuccessModal() {
             document.getElementById('successModal').classList.add('hidden');
-            
-            // 返回资产详情页
-            backToAssetDetail();
         }
         
         // 显示审批选项卡
@@ -1736,7 +1609,7 @@
             
             approvalDetailTitle.textContent = approvalType + '申请';
             
-            if (approvalType === '部门内变更') {
+            if (approvalType === '部门/单位内变更') {
                 approvalDetailContent.innerHTML = `
                     <h3 class="font-medium text-sm mb-2">变更信息</h3>
                     <div class="mb-2">
@@ -1764,7 +1637,7 @@
                         <p class="font-medium text-sm">由于工作需要，将设备调配至新工位。</p>
                     </div>
                 `;
-            } else if (approvalType === '跨部门调拨') {
+            } else if (approvalType === '跨部门/单位调拨') {
                 approvalDetailContent.innerHTML = `
                     <h3 class="font-medium text-sm mb-2">调拨信息</h3>
                     <div class="mb-2">
@@ -1823,13 +1696,13 @@
             // 根据不同类型更新详情内容
             let approvalType = '';
             if (type === 'pending' && id === 1) {
-                approvalType = '部门内变更';
+                approvalType = '部门/单位内变更';
             } else if (type === 'pending' && id === 2) {
-                approvalType = '跨部门调拨';
+                approvalType = '跨部门/单位调拨';
             } else if (type === 'submitted' && id === 1) {
                 approvalType = '资产报废';
             } else if (type === 'completed' && id === 1) {
-                approvalType = '部门内变更';
+                approvalType = '部门/单位内变更';
             } else if (type === 'completed' && id === 2) {
                 approvalType = '资产报废';
             }
@@ -1846,12 +1719,6 @@
         // 驳回审批
         function rejectApproval() {
             alert('审批已驳回');
-            backToApprovals();
-        }
-        
-        // 同意审批
-        function approveApproval() {
-            alert('审批已通过');
             backToApprovals();
         }
         

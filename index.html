@@ -10,6 +10,52 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: #f5f5f5;
         }
+                /* 筛选区域样式 */
+    .filter-section {
+        display: flex;
+        gap: 10px; /* 减小间距 */
+        margin-bottom: 10px; /* 减小底部间距 */
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    
+    .filter-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .filter-item label {
+        font-size: 12px; /* 减小字体大小 */
+        color: #555; /* 更加柔和的颜色 */
+    }
+    
+    .filter-item select {
+        padding: 4px 8px; /* 减小内边距 */
+        border: 1px solid #ccc; /* 更加柔和的边框 */
+        border-radius: 4px;
+        min-width: 100px; /* 设置最小宽度 */
+        font-size: 12px; /* 减小字体大小 */
+    }
+    
+    /* 筛选按钮样式 */
+    #apply-filter, #clear-filter {
+        padding: 4px 8px; /* 减小内边距 */
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px; /* 减小字体大小 */
+    }
+    
+    #apply-filter {
+        background-color: #3b82f6;
+        color: white;
+    }
+    
+    #clear-filter {
+        background-color: #e5e7eb;
+        color: #374151;
+    }
         .app-container {
             max-width: 414px;
             height: 736px;
@@ -1077,6 +1123,28 @@
             
             <!-- 待盘点资产列表 -->
             <h3 class="font-bold mb-2">待盘点资产</h3>
+            <div class="filter-section">
+                <div class="filter-item">
+                    <label for="department-filter">保管部门：</label>
+                    <select id="department-filter">
+                        <option value="">全部</option>
+                        <option value="">财务资产部</option>
+                        <option value="">办公室</option>
+                        <!-- 部门选项将通过JavaScript动态生成 -->
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label for="custodian-filter">保管人：</label>
+                    <select id="custodian-filter">
+                        <option value="">全部</option>
+                        <option value="">张三</option>
+                        <option value="">李四</option>
+                        <!-- 保管人选项将通过JavaScript动态生成 -->
+                    </select>
+                </div>
+                <!-- <button id="apply-filter" class="btn">应用筛选</button>
+                <button id="clear-filter" class="btn">清除筛选</button> -->
+            </div>
             <div class="bg-white p-3 rounded-xl shadow-sm mb-3" onclick="showInventoryCheck()">
                 <div class="flex">
                     <div class="mr-3 rounded-lg overflow-hidden" style="width: 60px; height: 60px;">
@@ -1458,6 +1526,88 @@
     </div>
 
     <script>
+                 // 初始化筛选功能
+    function initializeFilters() {
+        const assets = JSON.parse(localStorage.getItem('assets')) || [];
+        const departmentFilter = document.getElementById('department-filter');
+        const custodianFilter = document.getElementById('custodian-filter');
+        
+        // 获取唯一的部门和保管人列表
+        const departments = [...new Set(assets.map(asset => asset.department))];
+        const custodians = [...new Set(assets.map(asset => asset.custodian))];
+        
+        // 添加部门选项
+        departments.forEach(dept => {
+            if (dept) { // 确保不为空
+                const option = document.createElement('option');
+                option.value = dept;
+                option.textContent = dept;
+                departmentFilter.appendChild(option);
+            }
+        });
+        
+        // 添加保管人选项
+        custodians.forEach(person => {
+            if (person) { // 确保不为空
+                const option = document.createElement('option');
+                option.value = person;
+                option.textContent = person;
+                custodianFilter.appendChild(option);
+            }
+        });
+        
+        // 筛选功能
+        document.getElementById('apply-filter').addEventListener('click', applyFilters);
+        document.getElementById('clear-filter').addEventListener('click', clearFilters);
+    }
+    
+    // 应用筛选
+    function applyFilters() {
+        const departmentValue = document.getElementById('department-filter').value;
+        const custodianValue = document.getElementById('custodian-filter').value;
+        
+        const assets = JSON.parse(localStorage.getItem('assets')) || [];
+        let filteredAssets = [...assets];
+        
+        // 按部门筛选
+        if (departmentValue) {
+            filteredAssets = filteredAssets.filter(asset => asset.department === departmentValue);
+        }
+        
+        // 按保管人筛选
+        if (custodianValue) {
+            filteredAssets = filteredAssets.filter(asset => asset.custodian === custodianValue);
+        }
+        
+        // 重新渲染表格
+        renderAssetTable(filteredAssets);
+    }
+    
+    // 清除筛选
+    function clearFilters() {
+        document.getElementById('department-filter').value = '';
+        document.getElementById('custodian-filter').value = '';
+        
+        // 重新渲染表格，显示所有资产
+        const assets = JSON.parse(localStorage.getItem('assets')) || [];
+        renderAssetTable(assets);
+    }
+    
+    // 修改渲染资产表格函数以接受筛选后的资产
+    function renderAssetTable(assetsToRender = null) {
+        const assets = assetsToRender || JSON.parse(localStorage.getItem('assets')) || [];
+        const tableBody = document.querySelector('#asset-table tbody');
+        tableBody.innerHTML = '';
+        
+        // 渲染表格逻辑...
+        // ... existing code ...
+    }
+    
+    // 页面加载后初始化筛选功能
+    document.addEventListener('DOMContentLoaded', function() {
+        // ... existing code ...
+        initializeFilters();
+    });
         // 页面切换函数
         function showTab(tabId) {
             // 隐藏所有页面

@@ -311,7 +311,7 @@
                         <p class="font-medium">1台</p>
                     </div>
                     <div>
-                        <p class="text-gray-500 text-sm">入账日期</p>
+                        <p class="text-gray-500 text-sm">资产启用日期</p>
                         <p class="font-medium">2023-03-15</p>
                     </div>
                 </div>
@@ -348,10 +348,10 @@
                         <p class="text-gray-500 text-sm">资产净值</p>
                         <p class="font-medium">￥13,500.00</p>
                     </div>
-                    <div>
+                    <!-- <div>
                         <p class="text-gray-500 text-sm">资产启用日期</p>
                         <p class="font-medium">2023-03-20</p>
-                    </div>
+                    </div> -->
                     <div>
                         <p class="text-gray-500 text-sm">预定使用年限</p>
                         <p class="font-medium">5年</p>
@@ -432,7 +432,7 @@
         <h2 class="text-base font-bold mb-2">变更信息</h2>
         <div class="mb-2">
             <label class="block text-gray-700 text-xs font-bold mb-1" for="current-keeper">
-                本部门/处室资产保管人
+                本部门/处室资产管理人
             </label>
             <select class="block appearance-none w-full bg-white border border-gray-200 py-2 px-3 pr-8 rounded leading-tight focus:outline-none focus:border-blue-500 text-sm" id="current-keeper">
                 <option>请选择...</option>
@@ -567,7 +567,7 @@
         <h2 class="text-base font-bold mb-2">调拨信息</h2>
         <div class="mb-2">
             <label class="block text-gray-700 text-xs font-bold mb-1" for="current-keeper-transfer">
-                本部门/处室资产保管人
+                本部门/处室资产管理人
             </label>
             <select class="block appearance-none w-full bg-white border border-gray-200 py-2 px-3 pr-8 rounded leading-tight focus:outline-none focus:border-blue-500 text-sm" id="current-keeper-transfer">
                 <option>请选择...</option>
@@ -637,12 +637,22 @@
 
         <div class="mb-2">
             <label class="block text-gray-700 text-xs font-bold mb-1" for="transfer-new-keeper">
-                调入资产新实物保管人
+                调入资产新实物管理人
             </label>
             <select class="block appearance-none w-full bg-white border border-gray-200 py-2 px-3 pr-8 rounded leading-tight focus:outline-none focus:border-blue-500 text-sm" id="transfer-new-keeper">
                 <option>请选择资产新实物保管人...</option>
                 <option>王五（市场部）</option>
                 <option>赵六（财务部）</option>
+            </select>
+        </div>
+        <div class="mb-2">
+            <label class="block text-gray-700 text-xs font-bold mb-1" for="current-location">
+                变更后新保管地点
+            </label>
+            <select class="block appearance-none w-full bg-white border border-gray-200 py-2 px-3 pr-8 rounded leading-tight focus:outline-none focus:border-blue-500 text-sm" id="current-location">
+                <option>请选择...</option>
+                <option>北七家园区C座6层</option>
+                <option>北七家园区C座7层</option>
             </select>
         </div>
         
@@ -728,7 +738,7 @@
     
     <div class="bg-white rounded-xl shadow-sm p-3 mb-3">
         <h2 class="text-base font-bold mb-2">报废信息</h2>
-        <div class="mb-2">
+        <!-- <div class="mb-2">
             <label class="block text-gray-700 text-xs font-bold mb-1" for="disposal-reason-type">
                 报废类型
             </label>
@@ -739,13 +749,19 @@
                 <option>技术过时/淘汰</option>
                 <option>其他</option>
             </select>
-        </div>
+        </div> -->
         
         <div class="mb-2">
             <label class="block text-gray-700 text-xs font-bold mb-1" for="disposal-detail">
-                报废说明
+                报废原因
             </label>
             <textarea class="appearance-none border border-gray-200 rounded w-full py-2 px-3 text-sm text-gray-700 leading-tight focus:outline-none focus:border-blue-500" id="disposal-detail" rows="2" placeholder="请详细描述报废原因..."></textarea>
+        </div>
+        <div class="mb-2">
+            <label class="block text-gray-700 text-xs font-bold mb-1" for="disposal-detail">
+                残值处理及资产更新方案
+            </label>
+            <textarea class="appearance-none border border-gray-200 rounded w-full py-2 px-3 text-sm text-gray-700 leading-tight focus:outline-none focus:border-blue-500" id="disposal-detail" rows="2" placeholder="请详细描述残值处理及资产更新方案..."></textarea>
         </div>
         
         <!-- <div class="mb-2">
@@ -757,22 +773,17 @@
             </div>
         </div> -->
         
-        <div class="mb-2">
-            <label class="block text-gray-700 text-xs font-bold mb-1" for="disposal-value">
-                预估报废价值 (元)
-            </label>
-            <input type="number" placeholder="0.00" step="0.01" min="0" class="block appearance-none w-full bg-white border border-gray-200 py-2 px-3 rounded leading-tight focus:outline-none focus:border-blue-500 text-sm" id="disposal-value">
-        </div>
+
     </div>
     
-    <div class="bg-white rounded-xl shadow-sm p-3 mb-3">
+    <!-- <div class="bg-white rounded-xl shadow-sm p-3 mb-3">
         <div class="mb-2">
             <label class="block text-gray-700 text-xs font-bold mb-1" for="disposal-comment">
                 申请说明
             </label>
             <textarea class="appearance-none border border-gray-200 rounded w-full py-2 px-3 text-sm text-gray-700 leading-tight focus:outline-none focus:border-blue-500" id="disposal-comment" rows="2" placeholder="请详细说明申请原因..."></textarea>
         </div>
-    </div>
+    </div> -->
     
     <div class="flex justify-center">
         <button onclick="submitApproval('资产报废')" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg text-sm">
@@ -998,7 +1009,7 @@
         <div id="approvalDetailContent" class="border-t border-gray-200 pt-3 mt-3">
             <h3 class="font-medium text-sm mb-2">变更信息</h3>
             <div class="mb-2">
-                <p class="text-gray-500 text-xs mb-1">本部门/处室资产保管人</p>
+                <p class="text-gray-500 text-xs mb-1">本部门/处室资产管理人</p>
                 <p class="font-medium text-sm">张三</p>
             </div>
             <div class="mb-2">
@@ -1286,33 +1297,43 @@
                     </div>
                 </div>
                 
-                <div class="mb-3">
-                    <p class="text-gray-500 text-sm mb-1">资产名称</p>
-                    <p class="font-medium">HP Pro 笔记本电脑</p>
-                </div>
-                <div class="mb-3">
-                    <p class="text-gray-500 text-sm mb-1">资产编码</p>
-                    <p class="font-medium">AS-2023-0001</p>
-                </div>
-                <div class="mb-3">
-                    <p class="text-gray-500 text-sm mb-1">资产规格型号</p>
-                    <p class="font-medium">M1 Pro 14寸</p>
-                </div>
-                <div class="mb-3">
-                    <p class="text-gray-500 text-sm mb-1">所属部门</p>
-                    <p class="font-medium">信息技术部</p>
-                </div>
-                <div class="mb-3">
-                    <p class="text-gray-500 text-sm mb-1">保管人</p>
-                    <p class="font-medium">张三</p>
-                </div>
-                <div class="mb-3">
-                    <p class="text-gray-500 text-sm mb-1">保管地点</p>
-                    <p class="font-medium">北七家园区C座6层</p>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <p class="text-gray-500 text-sm mb-1">资产名称</p>
+                        <p class="font-medium">HP Pro 笔记本电脑</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-sm mb-1">资产编码</p>
+                        <p class="font-medium">AS-2023-0001</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-sm mb-1">资产规格型号</p>
+                        <p class="font-medium">M1 Pro 14寸</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-sm mb-1">品牌</p>
+                        <p class="font-medium">HP惠普</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-sm mb-1">制造商</p>
+                        <p class="font-medium">惠普中国</p>
+                    </div>                
+                    <div>
+                        <p class="text-gray-500 text-sm mb-1">所属部门</p>
+                        <p class="font-medium">信息技术部</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-sm mb-1">保管人</p>
+                        <p class="font-medium">张三</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-sm mb-1">保管地点</p>
+                        <p class="font-medium">北七家园区C座6层</p>
+                    </div>
                 </div>
             </div>
             
-            <div class="flex justify-between gap-3 mb-4">
+            <div class="flex justify-between gap-3 mb-18 mt-24">
                 <button onclick="inventorySuccess()" class="flex-1 py-3 bg-green-500 rounded-xl text-white text-sm font-medium">
                     盘点一致
                 </button>
@@ -1763,7 +1784,7 @@
                 approvalDetailContent.innerHTML = `
                     <h3 class="font-medium text-sm mb-2">变更信息</h3>
                     <div class="mb-2">
-                        <p class="text-gray-500 text-xs mb-1">本部门/处室资产保管人</p>
+                        <p class="text-gray-500 text-xs mb-1">本部门/处室资产管理人</p>
                         <p class="font-medium text-sm">张三</p>
                     </div>
                     <div class="mb-2">
@@ -1791,7 +1812,7 @@
                 approvalDetailContent.innerHTML = `
                     <h3 class="font-medium text-sm mb-2">调拨信息</h3>
                     <div class="mb-2">
-                        <p class="text-gray-500 text-xs mb-1">本部门/处室资产保管人</p>
+                        <p class="text-gray-500 text-xs mb-1">本部门/处室资产管理人</p>
                         <p class="font-medium text-sm">张三</p>
                     </div>
                     <div class="mb-2">
@@ -1799,12 +1820,20 @@
                         <p class="font-medium text-sm">公司本部</p>
                     </div>
                     <div class="mb-2">
-                        <p class="text-gray-500 text-xs mb-1">调入部门/处室/p>
+                        <p class="text-gray-500 text-xs mb-1">调入部门/处室</p>
                         <p class="font-medium text-sm">办公室</p>
                     </div>
                     <div class="mb-2">
                         <p class="text-gray-500 text-xs mb-1">调入资产新保管人</p>
                         <p class="font-medium text-sm">王五（市场部）</p>
+                    </div>
+                     <div class="mb-2">
+                        <p class="text-gray-500 text-xs mb-1">调入资产新实物管理人</p>
+                        <p class="font-medium text-sm">王五（市场部）</p>
+                    </div>                   
+                    <div class="mb-2">
+                        <p class="text-gray-500 text-xs mb-1">变更后新保管地点</p>
+                        <p class="font-medium text-sm">北七家园区C座6层</p>
                     </div>
 
                 `;

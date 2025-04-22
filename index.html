@@ -372,6 +372,13 @@
                     资产报废
                 </button>
             </div>
+            
+            <!-- 新增资产信息变更按钮 -->
+            <div class="flex justify-center mb-4">
+                <button onclick="showAssetInfoChange()" class="p-3 bg-purple-50 rounded-xl text-purple-600 text-sm font-medium w-full">
+                    资产信息变更
+                </button>
+            </div>
         </div>
 
 <!-- 1-1. 部门/单位内变更申请页面 - 更紧凑的布局 -->
@@ -451,7 +458,6 @@
                 <option>赵六</option>
             </select>
         </div>       -->
-        
         
         <div class="mb-2">
             <label class="block text-gray-700 text-xs font-bold mb-1" for="new-location">
@@ -792,6 +798,153 @@
     </div>
 </div>
 
+<!-- 新增资产信息变更页面 -->
+<div id="assetInfoChange" class="screen p-3">
+    <div class="flex items-center mb-3">
+        <button onclick="backToAssetDetail()" class="mr-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+        </button>
+        <h1 class="text-xl font-bold">资产信息变更</h1>
+    </div>
+    
+    <div class="bg-white rounded-xl shadow-sm p-3 mb-3">
+        <div class="grid grid-cols-2 gap-2">
+            <div>
+                <p class="text-gray-500 text-xs">申请人</p>
+                <p class="font-medium text-sm">张三</p>
+            </div>
+            <div>
+                <p class="text-gray-500 text-xs">申请公司</p>
+                <p class="font-medium text-sm">环宇互联网科技有限公司</p>
+            </div>
+            <div>
+                <p class="text-gray-500 text-xs">申请部门</p>
+                <p class="font-medium text-sm">产品研发部</p>
+            </div>
+            <div>
+                <p class="text-gray-500 text-xs">申请日期</p>
+                <p class="font-medium text-sm">2024-03-22</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-xl shadow-sm p-3 mb-3">
+        <h2 class="text-base font-bold mb-2">资产信息</h2>
+        <div class="grid grid-cols-2 gap-2">
+            <div>
+                <p class="text-gray-500 text-xs">资产名称</p>
+                <p class="font-medium text-sm">HP Pro 笔记本电脑</p>
+            </div>
+            <div>
+                <p class="text-gray-500 text-xs">资产编号</p>
+                <p class="font-medium text-sm">AS-2023-0001</p>
+            </div>
+            <div>
+                <p class="text-gray-500 text-xs">规格型号</p>
+                <p class="font-medium text-sm">M1 Pro 14寸</p>
+            </div>
+            <div>
+                <p class="text-gray-500 text-xs">实物保管地点</p>
+                <p class="font-medium text-sm">北七家园区C座6层</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-xl shadow-sm p-3 mb-3">
+        <h2 class="text-base font-bold mb-2">变更字段选择</h2>
+        <div class="mb-2">
+            <div class="flex items-center mb-2">
+                <input type="checkbox" id="changeModel" class="mr-2 h-4 w-4 text-blue-600">
+                <label for="changeModel" class="text-sm">规格型号</label>
+            </div>
+            <div id="modelChangeSection" class="ml-6 mb-2 hidden">
+                <label class="block text-gray-700 text-xs font-bold mb-1">
+                    新规格型号
+                </label>
+                <input type="text" class="block appearance-none w-full bg-white border border-gray-200 py-2 px-3 rounded leading-tight focus:outline-none focus:border-blue-500 text-sm" placeholder="请输入新规格型号...">
+            </div>
+            
+            <div class="flex items-center mb-2">
+                <input type="checkbox" id="changeManufacturer" class="mr-2 h-4 w-4 text-blue-600">
+                <label for="changeManufacturer" class="text-sm">制造厂商</label>
+            </div>
+            <div id="manufacturerChangeSection" class="ml-6 mb-2 hidden">
+                <label class="block text-gray-700 text-xs font-bold mb-1">
+                    新制造厂商
+                </label>
+                <input type="text" class="block appearance-none w-full bg-white border border-gray-200 py-2 px-3 rounded leading-tight focus:outline-none focus:border-blue-500 text-sm" placeholder="请输入新制造厂商...">
+            </div>
+            
+            <div class="flex items-center mb-2">
+                <input type="checkbox" id="changeBrand" class="mr-2 h-4 w-4 text-blue-600">
+                <label for="changeBrand" class="text-sm">品牌</label>
+            </div>
+            <div id="brandChangeSection" class="ml-6 mb-2 hidden">
+                <label class="block text-gray-700 text-xs font-bold mb-1">
+                    新品牌
+                </label>
+                <input type="text" class="block appearance-none w-full bg-white border border-gray-200 py-2 px-3 rounded leading-tight focus:outline-none focus:border-blue-500 text-sm" placeholder="请输入新品牌...">
+            </div>
+            
+            <div class="flex items-center mb-2">
+                <input type="checkbox" id="changeDeviceCode" class="mr-2 h-4 w-4 text-blue-600">
+                <label for="changeDeviceCode" class="text-sm">设备编码</label>
+            </div>
+            <div id="deviceCodeChangeSection" class="ml-6 mb-2 hidden">
+                <label class="block text-gray-700 text-xs font-bold mb-1">
+                    新设备编码
+                </label>
+                <input type="text" class="block appearance-none w-full bg-white border border-gray-200 py-2 px-3 rounded leading-tight focus:outline-none focus:border-blue-500 text-sm" placeholder="请输入新设备编码...">
+            </div>
+            
+            <div class="flex items-center mb-2">
+                <input type="checkbox" id="changeValue" class="mr-2 h-4 w-4 text-blue-600">
+                <label for="changeValue" class="text-sm">资产原值</label>
+            </div>
+            <div id="valueChangeSection" class="ml-6 mb-2 hidden">
+                <label class="block text-gray-700 text-xs font-bold mb-1">
+                    新资产原值
+                </label>
+                <input type="text" class="block appearance-none w-full bg-white border border-gray-200 py-2 px-3 rounded leading-tight focus:outline-none focus:border-blue-500 text-sm" placeholder="请输入新资产原值...">
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-xl shadow-sm p-3 mb-3">
+        <div class="mb-2">
+            <label class="block text-gray-700 text-xs font-bold mb-1" for="change-reason">
+                变更原因
+            </label>
+            <textarea class="appearance-none border border-gray-200 rounded w-full py-2 px-3 text-sm text-gray-700 leading-tight focus:outline-none focus:border-blue-500" id="change-reason" rows="2" placeholder="请详细说明变更原因..."></textarea>
+        </div>
+        
+        <!-- <div class="mb-2">
+            <label class="block text-gray-700 text-xs font-bold mb-1" for="attach-proof">
+                附加证明材料
+            </label>
+            <div class="flex items-center justify-center w-full">
+                <label for="file-upload" class="flex flex-col items-center justify-center w-full h-24 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                    <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                        <svg class="w-8 h-8 mb-2 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
+                        </svg>
+                        <p class="text-xs text-gray-500">点击上传证明材料</p>
+                    </div>
+                    <input id="file-upload" type="file" class="hidden" />
+                </label>
+            </div> 
+        </div> -->
+    </div>
+    
+    <div class="flex justify-center">
+        <button onclick="submitApproval('资产信息变更')" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-6 rounded-lg text-sm">
+            提交变更申请
+        </button>
+    </div>
+</div>
+
         <!-- 审批单据页面 -->
         <div id="approvals" class="screen p-4">
             <div class="flex justify-between items-center mb-4">
@@ -806,17 +959,88 @@
             </div>
             
             <!-- 审批Tab切换 -->
-            <div class="flex border-b mb-4">
-                <button onclick="showApprovalTab('pending')" id="pendingTab" class="py-2 px-4 text-blue-500 border-b-2 border-blue-500 font-medium">
-                    待我审批
+            <div class="flex border-b mb-4 w-full">
+                <button onclick="showApprovalTab('pending')" id="pendingTab" class="flex-1 py-3 rounded-t-lg border-b-2 border-blue-500 bg-blue-50 font-medium flex flex-col items-center">
+                    <div class="bg-blue-100 p-2 rounded-lg mb-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <span class="text-blue-500">待我审批</span>
                 </button>
-                <button onclick="showApprovalTab('submitted')" id="submittedTab" class="py-2 px-4 text-gray-500 font-medium">
-                    我已提交
+                <button onclick="showApprovalTab('submitted')" id="submittedTab" class="flex-1 py-3 font-medium flex flex-col items-center">
+                    <div class="bg-green-100 p-2 rounded-lg mb-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                    </div>
+                    <span class="text-gray-500">我已提交</span>
                 </button>
-                <button onclick="showApprovalTab('completed')" id="completedTab" class="py-2 px-4 text-gray-500 font-medium">
-                    已完成
+                <button onclick="showApprovalTab('completed')" id="completedTab" class="flex-1 py-3 font-medium flex flex-col items-center">
+                    <div class="bg-amber-100 p-2 rounded-lg mb-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <span class="text-gray-500">已完成</span>
                 </button>
             </div>
+
+            <script>
+                function showApprovalTab(tabId) {
+                    // 隐藏所有审批列表
+                    document.querySelectorAll('.approval-list').forEach(list => {
+                        list.classList.add('hidden');
+                    });
+                    
+                    // 显示选中的审批列表
+                    document.getElementById(`${tabId}Approvals`).classList.remove('hidden');
+                    
+                    // 更新审批Tab状态
+                    document.querySelectorAll('#pendingTab, #submittedTab, #completedTab').forEach(tab => {
+                        // 移除所有背景和边框样式
+                        tab.classList.remove('bg-blue-50', 'border-b-2', 'border-blue-500', 'bg-green-50', 'border-green-500', 'bg-amber-50', 'border-amber-500');
+                        tab.classList.add('text-gray-500');
+                        
+                        // 恢复未选中Tab的图标背景颜色
+                        const iconDiv = tab.querySelector('div');
+                        if (tab.id === 'pendingTab') {
+                            iconDiv.classList.remove('bg-gray-100');
+                            iconDiv.classList.add('bg-blue-100');
+                        } else if (tab.id === 'submittedTab') {
+                            iconDiv.classList.remove('bg-gray-100');
+                            iconDiv.classList.add('bg-green-100');
+                        } else if (tab.id === 'completedTab') {
+                            iconDiv.classList.remove('bg-gray-100');
+                            iconDiv.classList.add('bg-amber-100');
+                        }
+                    });
+                    
+                    // 为选中的Tab添加样式
+                    const selectedTab = document.getElementById(`${tabId}Tab`);
+                    selectedTab.classList.remove('text-gray-500');
+                    
+                    if (tabId === 'pending') {
+                        selectedTab.classList.add('bg-blue-50', 'border-b-2', 'border-blue-500', 'text-blue-500');
+                        selectedTab.querySelector('div').classList.remove('bg-gray-100');
+                        selectedTab.querySelector('div').classList.add('bg-blue-100');
+                        selectedTab.querySelector('svg').classList.remove('text-gray-500');
+                        selectedTab.querySelector('svg').classList.add('text-blue-500');
+                    } else if (tabId === 'submitted') {
+                        selectedTab.classList.add('bg-green-50', 'border-b-2', 'border-green-500', 'text-green-500');
+                        selectedTab.querySelector('div').classList.remove('bg-gray-100');
+                        selectedTab.querySelector('div').classList.add('bg-green-100');
+                        selectedTab.querySelector('svg').classList.remove('text-gray-500');
+                        selectedTab.querySelector('svg').classList.add('text-green-500');
+                    } else if (tabId === 'completed') {
+                        selectedTab.classList.add('bg-amber-50', 'border-b-2', 'border-amber-500', 'text-amber-500');
+                        selectedTab.querySelector('div').classList.remove('bg-gray-100');
+                        selectedTab.querySelector('div').classList.add('bg-amber-100');
+                        selectedTab.querySelector('svg').classList.remove('text-gray-500');
+                        selectedTab.querySelector('svg').classList.add('text-amber-500');
+                    }
+                }
+            </script>
             
             <!-- 待我审批列表 -->
             <div id="pendingApprovals" class="approval-list">
@@ -883,6 +1107,27 @@
                     </div>
                 </div>
                 
+                <!-- 新增资产信息变更示例 -->
+                <div class="bg-white p-3 rounded-xl shadow-sm mb-3" onclick="showApprovalDetail('submitted', 3)">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <div class="bg-purple-100 p-2 rounded-lg mr-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="font-bold">资产信息变更</h3>
+                                <p class="text-sm text-gray-500">HP Pro 笔记本电脑</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="inline-block px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">审批中</span>
+                            <p class="text-xs text-gray-500 mt-1">2023-08-12 10:20</p>
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="bg-white p-3 rounded-xl shadow-sm mb-3" onclick="showApprovalDetail('submitted', 2)">
                     <div class="flex justify-between items-center">
                         <div class="flex items-center">
@@ -906,6 +1151,27 @@
             
             <!-- 已完成列表 -->
             <div id="completedApprovals" class="approval-list hidden">
+                <!-- 新增已完成的资产信息变更示例 -->
+                <div class="bg-white p-3 rounded-xl shadow-sm mb-3" onclick="showApprovalDetail('completed', 3)">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <div class="bg-purple-100 p-2 rounded-lg mr-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="font-bold">资产信息变更</h3>
+                                <p class="text-sm text-gray-500">Dell U2720Q 显示器</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="inline-block px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">已通过</span>
+                            <p class="text-xs text-gray-500 mt-1">2023-07-28 09:40</p>
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="bg-white p-3 rounded-xl shadow-sm mb-3" onclick="showApprovalDetail('completed', 1)">
                     <div class="flex justify-between items-center">
                         <div class="flex items-center">
@@ -1203,10 +1469,12 @@
                         <h3 class="text-lg font-bold">HermanMiller 人体工学椅</h3>
                         <div class="flex justify-between text-sm text-gray-500 mt-1">
                             <span>资产编号: AS-2022-0156</span>
+                            <span class="text-green-500">已完成</span>
                         </div>
                         <div class="flex justify-between text-sm text-gray-500 mt-1">
                             <span>盘点结果: 盘点一致</span>
-                            <span class="text-green-500">已完成</span>
+                            <span>保管人: 张三</span>
+                            
                         </div>
                     </div>
                 </div>
@@ -1221,10 +1489,12 @@
                         <h3 class="text-lg font-bold">Dell U2720Q 显示器</h3>
                         <div class="flex justify-between text-sm text-gray-500 mt-1">
                             <span>资产编号: AS-2023-0085</span>
+                            <span class="text-yellow-500">已提交审批</span>
                         </div>
                         <div class="flex justify-between text-sm text-gray-500 mt-1">
                             <span>盘点结果: 信息有误</span>
-                            <span class="text-yellow-500">已提交审批</span>
+                            <span>保管人: 张三</span>
+                            
                         </div>
                     </div>
                 </div>
@@ -1628,7 +1898,50 @@
     document.addEventListener('DOMContentLoaded', function() {
         // ... existing code ...
         initializeFilters();
+        
+        // 初始化资产信息变更页面的复选框功能
+        initializeAssetInfoChangeCheckboxes();
     });
+    
+    // 初始化资产信息变更页面的复选框功能
+    function initializeAssetInfoChangeCheckboxes() {
+        // 监听规格型号复选框
+        document.getElementById('changeModel')?.addEventListener('change', function() {
+            toggleInputSection('changeModel', 'modelChangeSection');
+        });
+        
+        // 监听制造厂商复选框
+        document.getElementById('changeManufacturer')?.addEventListener('change', function() {
+            toggleInputSection('changeManufacturer', 'manufacturerChangeSection');
+        });
+        
+        // 监听品牌复选框
+        document.getElementById('changeBrand')?.addEventListener('change', function() {
+            toggleInputSection('changeBrand', 'brandChangeSection');
+        });
+        
+        // 监听设备编码复选框
+        document.getElementById('changeDeviceCode')?.addEventListener('change', function() {
+            toggleInputSection('changeDeviceCode', 'deviceCodeChangeSection');
+        });
+        
+        // 监听资产原值复选框
+        document.getElementById('changeValue')?.addEventListener('change', function() {
+            toggleInputSection('changeValue', 'valueChangeSection');
+        });
+    }
+    
+    // 切换输入区域显示/隐藏
+    function toggleInputSection(checkboxId, sectionId) {
+        const checkbox = document.getElementById(checkboxId);
+        const section = document.getElementById(sectionId);
+        
+        if (checkbox.checked) {
+            section.classList.remove('hidden');
+        } else {
+            section.classList.add('hidden');
+        }
+    }
         // 页面切换函数
         function showTab(tabId) {
             // 隐藏所有页面
@@ -1675,6 +1988,14 @@
         function showAssetDisposal() {
             document.getElementById('assetDetail').classList.remove('active');
             document.getElementById('assetDisposal').classList.add('active');
+        }
+        
+        // 显示资产信息变更页面
+        function showAssetInfoChange() {
+            document.getElementById('assetDetail').classList.remove('active');
+            document.getElementById('assetInfoChange').classList.add('active');
+            // 页面加载后初始化复选框功能
+            initializeAssetInfoChangeCheckboxes();
         }
         
         // 返回资产详情
@@ -1765,12 +2086,47 @@
             
             // 更新审批Tab状态
             document.querySelectorAll('#pendingTab, #submittedTab, #completedTab').forEach(tab => {
-                tab.classList.remove('text-blue-500', 'border-b-2', 'border-blue-500');
+                // 移除所有背景和边框样式
+                tab.classList.remove('bg-blue-50', 'border-b-2', 'border-blue-500', 'bg-green-50', 'border-green-500', 'bg-amber-50', 'border-amber-500');
                 tab.classList.add('text-gray-500');
+                
+                // 恢复未选中Tab的图标背景颜色
+                const iconDiv = tab.querySelector('div');
+                if (tab.id === 'pendingTab') {
+                    iconDiv.classList.remove('bg-gray-100');
+                    iconDiv.classList.add('bg-blue-100');
+                } else if (tab.id === 'submittedTab') {
+                    iconDiv.classList.remove('bg-gray-100');
+                    iconDiv.classList.add('bg-green-100');
+                } else if (tab.id === 'completedTab') {
+                    iconDiv.classList.remove('bg-gray-100');
+                    iconDiv.classList.add('bg-amber-100');
+                }
             });
             
-            document.getElementById(`${tabId}Tab`).classList.remove('text-gray-500');
-            document.getElementById(`${tabId}Tab`).classList.add('text-blue-500', 'border-b-2', 'border-blue-500');
+            // 为选中的Tab添加样式
+            const selectedTab = document.getElementById(`${tabId}Tab`);
+            selectedTab.classList.remove('text-gray-500');
+            
+            if (tabId === 'pending') {
+                selectedTab.classList.add('bg-blue-50', 'border-b-2', 'border-blue-500', 'text-blue-500');
+                selectedTab.querySelector('div').classList.remove('bg-gray-100');
+                selectedTab.querySelector('div').classList.add('bg-blue-100');
+                selectedTab.querySelector('svg').classList.remove('text-gray-500');
+                selectedTab.querySelector('svg').classList.add('text-blue-500');
+            } else if (tabId === 'submitted') {
+                selectedTab.classList.add('bg-green-50', 'border-b-2', 'border-green-500', 'text-green-500');
+                selectedTab.querySelector('div').classList.remove('bg-gray-100');
+                selectedTab.querySelector('div').classList.add('bg-green-100');
+                selectedTab.querySelector('svg').classList.remove('text-gray-500');
+                selectedTab.querySelector('svg').classList.add('text-green-500');
+            } else if (tabId === 'completed') {
+                selectedTab.classList.add('bg-amber-50', 'border-b-2', 'border-amber-500', 'text-amber-500');
+                selectedTab.querySelector('div').classList.remove('bg-gray-100');
+                selectedTab.querySelector('div').classList.add('bg-amber-100');
+                selectedTab.querySelector('svg').classList.remove('text-gray-500');
+                selectedTab.querySelector('svg').classList.add('text-amber-500');
+            }
         }
         
         // 审批详情模板函数
@@ -1853,6 +2209,35 @@
                         <p class="font-medium text-sm">设备已无法正常使用，建议报废处理。</p>
                     </div>
                 `;
+            } else if (approvalType === '资产信息变更') {
+                approvalDetailContent.innerHTML = `
+                    <h3 class="font-medium text-sm mb-2">变更信息</h3>
+                    <div class="mb-2">
+                        <p class="text-gray-500 text-xs mb-1">变更字段</p>
+                        <p class="font-medium text-sm">规格型号, 制造厂商</p>
+                    </div>
+                    <div class="mb-2">
+                        <p class="text-gray-500 text-xs mb-1">原规格型号</p>
+                        <p class="font-medium text-sm">M1 Pro 14寸</p>
+                    </div>
+                    <div class="mb-2">
+                        <p class="text-gray-500 text-xs mb-1">新规格型号</p>
+                        <p class="font-medium text-sm">M2 Pro 14寸</p>
+                    </div>
+                    <div class="mb-2">
+                        <p class="text-gray-500 text-xs mb-1">原制造厂商</p>
+                        <p class="font-medium text-sm">Apple Inc.</p>
+                    </div>
+                    <div class="mb-2">
+                        <p class="text-gray-500 text-xs mb-1">新制造厂商</p>
+                        <p class="font-medium text-sm">Apple中国</p>
+                    </div>
+                    <div class="mb-2">
+                        <p class="text-gray-500 text-xs mb-1">变更原因</p>
+                        <p class="font-medium text-sm">资产信息录入有误，根据资产标签进行更正。</p>
+                    </div>
+
+                `;
             }
         }
         
@@ -1876,10 +2261,18 @@
                 approvalType = '跨部门/单位调拨';
             } else if (type === 'submitted' && id === 1) {
                 approvalType = '资产报废';
+            } else if (type === 'submitted' && id === 3) {
+                approvalType = '资产信息变更';
             } else if (type === 'completed' && id === 1) {
                 approvalType = '部门/单位内变更';
             } else if (type === 'completed' && id === 2) {
                 approvalType = '资产报废';
+            } else if (type === 'completed' && id === 3) {
+                approvalType = '资产信息变更';
+                
+                // 更改审批状态显示为已通过
+                document.getElementById('approvalDetailStatus').textContent = '已通过';
+                document.getElementById('approvalDetailStatus').className = 'inline-block px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full';
             }
             
             updateApprovalDetail(approvalType);
